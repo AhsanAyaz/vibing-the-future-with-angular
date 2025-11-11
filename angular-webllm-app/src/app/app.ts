@@ -32,8 +32,7 @@ import { DocumentAnalyzerComponent } from './components/document-analyzer/docume
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, DocumentAnalyzerComponent],
-  templateUrl: './app.html',
-  styleUrl: './app.scss'
+  templateUrl: './app.html'
 })
 export class App implements OnInit {
   protected readonly title = 'Smart Document Analyzer';

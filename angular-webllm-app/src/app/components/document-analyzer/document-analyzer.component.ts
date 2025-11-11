@@ -23,8 +23,7 @@ import { WebLLMService } from '../../services/webllm.service';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule],
-  templateUrl: './document-analyzer.component.html',
-  styleUrls: ['./document-analyzer.component.scss']
+  templateUrl: './document-analyzer.component.html'
 })
 export class DocumentAnalyzerComponent {
   readonly docService = inject(DocumentAnalysisService);
