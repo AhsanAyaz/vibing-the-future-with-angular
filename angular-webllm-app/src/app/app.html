@@ -1,0 +1,108 @@
+<div class="app-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <h1>🧠 {{ title }}</h1>
+      <p class="subtitle">AI-Powered Document Analysis with Web-LLM (100% Private)</p>
+      <div class="model-status">
+        @if (webllm.isReady()) {
+          <span class="status-badge ready">● Model Ready</span>
+        } @else if (webllm.isLoading()) {
+          <span class="status-badge loading">⏳ Loading Model...</span>
+        } @else {
+          <span class="status-badge not-ready">○ Not Initialized</span>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    @if (showInitializer()) {
+      <!-- Model Initialization Screen -->
+      <div class="initializer-container">
+        <div class="initializer-card">
+          <div class="icon">🚀</div>
+          <h2>Welcome to Smart Document Analyzer</h2>
+          <p class="description">
+            This application uses Web-LLM to analyze documents entirely in your browser.
+            Your data never leaves your device, ensuring complete privacy.
+          </p>
+
+          @if (webllm.isLoading()) {
+            <div class="loading-section">
+              <div class="progress-container">
+                <div class="progress-bar">
+                  <div
+                    class="progress-fill"
+                    [style.width.%]="webllm.loadProgress().progress * 100">
+                  </div>
+                </div>
+                <div class="progress-text">
+                  {{ (webllm.loadProgress().progress * 100).toFixed(1) }}%
+                </div>
+              </div>
+              <p class="progress-message">{{ webllm.loadProgress().text }}</p>
+              <p class="time-elapsed">
+                Time elapsed: {{ formatTime(webllm.loadProgress().timeElapsed) }}
+              </p>
+              <div class="info-box">
+                <strong>Note:</strong> First-time setup downloads ~4GB model.
+                This may take several minutes depending on your connection.
+                The model is cached for future use.
+              </div>
+            </div>
+          } @else if (webllm.error()) {
+            <div class="error-box">
+              <strong>Error:</strong> {{ webllm.error() }}
+            </div>
+            <button class="btn-primary" (click)="initializeModel()">
+              Try Again
+            </button>
+          } @else {
+            <div class="features-grid">
+              <div class="feature">
+                <div class="feature-icon">📄</div>
+                <h3>Document Analysis</h3>
+                <p>Get AI-powered summaries and key insights</p>
+              </div>
+              <div class="feature">
+                <div class="feature-icon">💬</div>
+                <h3>Q&A Chat</h3>
+                <p>Ask questions about your documents</p>
+              </div>
+              <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <h3>100% Private</h3>
+                <p>All processing happens in your browser</p>
+              </div>
+              <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>Offline Ready</h3>
+                <p>Works without an internet connection</p>
+              </div>
+            </div>
+            <button class="btn-primary btn-large" (click)="initializeModel()">
+              Initialize AI Model
+            </button>
+            <p class="download-info">
+              This will download ~4GB. Make sure you have a stable connection.
+            </p>
+          }
+        </div>
+      </div>
+    } @else {
+      <!-- Document Analyzer -->
+      <app-document-analyzer></app-document-analyzer>
+    }
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>
+      Powered by
+      <a href="https://mlc.ai/web-llm" target="_blank" rel="noopener">Web-LLM</a>
+      | Built with Angular 19
+    </p>
+  </footer>
+</div>
