@@ -67,8 +67,8 @@ export class WebLLMService {
       if ('serviceWorker' in navigator && !this.serviceWorkerRegistration) {
         try {
           this.serviceWorkerRegistration = await navigator.serviceWorker.register(
-            new URL('/sw.ts', import.meta.url),
-            { type: 'module' }
+            '/sw.js',
+            { scope: '/' }
           );
           console.log('Service Worker registered successfully');
 

@@ -72,18 +72,33 @@ export class IndexedDBService {
 
   /**
    * Save a document to IndexedDB
+   * Note: The id parameter is optional and will be auto-generated if not provided
    */
-  async saveDocument(document: Document): Promise<number> {
+  async saveDocument(document: Omit<Document, 'id'> & { id?: number }): Promise<number> {
     const db = await this.ensureDB();
 
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([this.STORE_NAME], 'readwrite');
       const store = transaction.objectStore(this.STORE_NAME);
 
-      const request = store.put({
-        ...document,
-        timestamp: Date.now()
-      });
+      // Only include id if it's a valid number
+      const docToSave: any = {
+        name: document.name,
+        content: document.content,
+        timestamp: document.timestamp || Date.now()
+      };
+
+      // Store the application's UUID if provided
+      if (document.documentId) {
+        docToSave.documentId = document.documentId;
+      }
+
+      // Only add id if it's a valid number (for updates)
+      if (typeof document.id === 'number' && !isNaN(document.id)) {
+        docToSave.id = document.id;
+      }
+
+      const request = store.put(docToSave);
 
       request.onsuccess = () => {
         resolve(request.result as number);
@@ -209,7 +224,8 @@ export class IndexedDBService {
  * StoredDocument interface for IndexedDB persistence
  */
 export interface Document {
-  id?: number;
+  id?: number; // Auto-generated numeric ID by IndexedDB
+  documentId?: string; // Application UUID
   name: string;
   content: string;
   timestamp?: number;

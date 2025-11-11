@@ -8,6 +8,7 @@ export interface Document {
   content: string;
   createdAt: Date;
   analysis?: DocumentAnalysis;
+  idbId?: number; // IndexedDB numeric ID for persistence
 }
 
 export interface DocumentAnalysis {
@@ -60,7 +61,8 @@ export class DocumentAnalysisService {
 
       // Convert IDB documents to app documents
       const docs: Document[] = idbDocs.map(idbDoc => ({
-        id: String(idbDoc.id || crypto.randomUUID()),
+        id: idbDoc.documentId || crypto.randomUUID(), // Use stored UUID or generate new one
+        idbId: idbDoc.id, // Store IndexedDB numeric ID for updates/deletes
         title: idbDoc.name,
         content: idbDoc.content,
         createdAt: new Date(idbDoc.timestamp || Date.now()),
@@ -79,18 +81,29 @@ export class DocumentAnalysisService {
   /**
    * Save document to IndexedDB
    */
-  private async saveToIndexedDB(doc: Document): Promise<void> {
+  private async saveToIndexedDB(doc: Document): Promise<number> {
     try {
-      const idbDoc: IDBDocument = {
-        id: Number(doc.id) || undefined,
+      const idbDoc: Partial<IDBDocument> = {
+        id: doc.idbId, // Use existing IndexedDB ID if available (for updates)
+        documentId: doc.id, // Store the UUID for later retrieval
         name: doc.title,
         content: doc.content,
         timestamp: doc.createdAt.getTime(),
       };
 
-      await this.indexedDB.saveDocument(idbDoc);
+      const idbId = await this.indexedDB.saveDocument(idbDoc as any);
+
+      // Update the document with the IndexedDB ID
+      if (!doc.idbId) {
+        this.documents.update(docs =>
+          docs.map(d => d.id === doc.id ? { ...d, idbId } : d)
+        );
+      }
+
+      return idbId;
     } catch (error) {
       console.error('Failed to save document to IndexedDB:', error);
+      throw error;
     }
   }
 
@@ -130,11 +143,15 @@ export class DocumentAnalysisService {
    * Delete a document
    */
   async deleteDocument(docId: string): Promise<void> {
-    // Delete from IndexedDB
-    try {
-      await this.indexedDB.deleteDocument(Number(docId));
-    } catch (error) {
-      console.error('Failed to delete document from IndexedDB:', error);
+    const doc = this.documents().find(d => d.id === docId);
+
+    // Delete from IndexedDB if it has an IndexedDB ID
+    if (doc?.idbId) {
+      try {
+        await this.indexedDB.deleteDocument(doc.idbId);
+      } catch (error) {
+        console.error('Failed to delete document from IndexedDB:', error);
+      }
     }
 
     this.documents.update(docs => docs.filter(d => d.id !== docId));
