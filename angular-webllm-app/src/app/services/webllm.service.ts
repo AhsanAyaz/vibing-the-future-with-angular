@@ -38,7 +38,9 @@ export class WebLLMService {
   readonly isLoading = computed(() => this.status() === 'loading');
 
   // Configuration
-  private readonly DEFAULT_MODEL = 'Llama-3.1-8B-Instruct-q4f32_1';
+  // Using MLC-compiled Llama 3.1 8B model optimized for WebGPU inference
+  // This model achieves 80-90% of native performance in-browser
+  private readonly DEFAULT_MODEL = 'Llama-3.1-8B-Instruct-q4f32_1-MLC';
   private conversationHistory: Message[] = [];
 
   /**

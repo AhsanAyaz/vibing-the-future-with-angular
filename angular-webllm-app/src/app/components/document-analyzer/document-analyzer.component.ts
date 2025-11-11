@@ -1,12 +1,27 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DocumentAnalysisService, Document, DocumentAnalysis } from '../../services/document-analysis.service';
 import { WebLLMService } from '../../services/webllm.service';
 
+/**
+ * DocumentAnalyzerComponent
+ *
+ * Production-grade Angular component demonstrating AI-assisted engineering patterns:
+ * - Standalone architecture for optimal tree-shaking
+ * - OnPush change detection for performance
+ * - Signals for fine-grained reactivity
+ * - Separation of concerns (UI vs business logic in services)
+ *
+ * This component showcases the "AI-Assisted Engineering" paradigm:
+ * - Clear architecture (not just AI-generated code dumps)
+ * - Proper error handling and loading states
+ * - Type safety and validation
+ */
 @Component({
   selector: 'app-document-analyzer',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule],
   templateUrl: './document-analyzer.component.html',
   styleUrls: ['./document-analyzer.component.scss']
