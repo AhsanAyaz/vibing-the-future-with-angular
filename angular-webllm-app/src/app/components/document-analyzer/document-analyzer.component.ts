@@ -50,21 +50,29 @@ export class DocumentAnalyzerComponent {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
 
-    const file = input.files[0];
-    const content = await file.text();
+    this.docService.isLoadingFile.set(true);
 
-    this.documentTitle = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
-    this.documentContent = content;
-    this.isAddingDocument.set(true);
+    try {
+      const file = input.files[0];
+      const content = await file.text();
 
-    // Reset file input
-    input.value = '';
+      this.documentTitle = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
+      this.documentContent = content;
+      this.isAddingDocument.set(true);
+    } catch (error) {
+      console.error('Failed to read file:', error);
+      alert('Failed to read file. Please try again.');
+    } finally {
+      this.docService.isLoadingFile.set(false);
+      // Reset file input
+      input.value = '';
+    }
   }
 
-  addDocument() {
+  async addDocument() {
     if (!this.documentContent.trim()) return;
 
-    this.docService.addDocument(this.documentTitle, this.documentContent);
+    await this.docService.addDocument(this.documentTitle, this.documentContent);
     this.documentTitle = '';
     this.documentContent = '';
     this.isAddingDocument.set(false);
@@ -82,10 +90,10 @@ export class DocumentAnalyzerComponent {
     this.activeTab.set('analysis');
   }
 
-  deleteDocument(docId: string, event: Event) {
+  async deleteDocument(docId: string, event: Event) {
     event.stopPropagation();
     if (confirm('Are you sure you want to delete this document?')) {
-      this.docService.deleteDocument(docId);
+      await this.docService.deleteDocument(docId);
     }
   }
 

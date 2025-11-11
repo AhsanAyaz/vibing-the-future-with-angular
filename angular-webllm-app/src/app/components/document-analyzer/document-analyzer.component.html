@@ -1,4 +1,26 @@
-<div class="flex gap-4 h-[calc(100vh-200px)]">
+<div class="flex gap-4 h-[calc(100vh-200px)] relative">
+  <!-- Loading Overlay for File Loading -->
+  @if (docService.isLoadingFile()) {
+    <div class="absolute inset-0 bg-base-100/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
+      <div class="glass-effect p-8 rounded-2xl flex flex-col items-center gap-4">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <p class="text-lg font-semibold">Loading file...</p>
+        <p class="text-sm text-base-content/60">Please wait while we read your document</p>
+      </div>
+    </div>
+  }
+
+  <!-- Loading Overlay for IndexedDB -->
+  @if (docService.isLoadingDocuments()) {
+    <div class="absolute inset-0 bg-base-100/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
+      <div class="glass-effect p-8 rounded-2xl flex flex-col items-center gap-4">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <p class="text-lg font-semibold">Loading documents...</p>
+        <p class="text-sm text-base-content/60">Retrieving your saved documents</p>
+      </div>
+    </div>
+  }
+
   <!-- Sidebar -->
   <aside class="w-80 glass-effect rounded-2xl p-4 flex flex-col">
     <div class="flex items-center justify-between mb-4">

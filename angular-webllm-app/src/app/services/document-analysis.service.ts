@@ -1,5 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { WebLLMService } from './webllm.service';
+import { IndexedDBService, Document as IDBDocument } from './indexdb.service';
 
 export interface Document {
   id: string;
@@ -28,29 +29,84 @@ export interface QAMessage {
 /**
  * Document Analysis Service
  * Manages documents and provides AI-powered analysis capabilities
+ * Now with IndexedDB persistence for documents across sessions
  */
 @Injectable({
   providedIn: 'root'
 })
 export class DocumentAnalysisService {
+  private readonly webllm = inject(WebLLMService);
+  private readonly indexedDB = inject(IndexedDBService);
+
   // State
   readonly documents = signal<Document[]>([]);
   readonly currentDocument = signal<Document | null>(null);
   readonly qaHistory = signal<QAMessage[]>([]);
   readonly isAnalyzing = signal(false);
+  readonly isLoadingDocuments = signal(false);
+  readonly isLoadingFile = signal(false);
 
-  constructor(private webllm: WebLLMService) {}
+  constructor() {
+    this.loadDocumentsFromDB();
+  }
+
+  /**
+   * Load documents from IndexedDB on initialization
+   */
+  private async loadDocumentsFromDB(): Promise<void> {
+    this.isLoadingDocuments.set(true);
+    try {
+      const idbDocs = await this.indexedDB.getAllDocuments();
+
+      // Convert IDB documents to app documents
+      const docs: Document[] = idbDocs.map(idbDoc => ({
+        id: String(idbDoc.id || crypto.randomUUID()),
+        title: idbDoc.name,
+        content: idbDoc.content,
+        createdAt: new Date(idbDoc.timestamp || Date.now()),
+        // Analysis would need to be stored separately if needed
+      }));
+
+      this.documents.set(docs);
+      console.log(`📚 Loaded ${docs.length} documents from IndexedDB`);
+    } catch (error) {
+      console.error('Failed to load documents from IndexedDB:', error);
+    } finally {
+      this.isLoadingDocuments.set(false);
+    }
+  }
+
+  /**
+   * Save document to IndexedDB
+   */
+  private async saveToIndexedDB(doc: Document): Promise<void> {
+    try {
+      const idbDoc: IDBDocument = {
+        id: Number(doc.id) || undefined,
+        name: doc.title,
+        content: doc.content,
+        timestamp: doc.createdAt.getTime(),
+      };
+
+      await this.indexedDB.saveDocument(idbDoc);
+    } catch (error) {
+      console.error('Failed to save document to IndexedDB:', error);
+    }
+  }
 
   /**
    * Add a new document
    */
-  addDocument(title: string, content: string): Document {
+  async addDocument(title: string, content: string): Promise<Document> {
     const doc: Document = {
       id: crypto.randomUUID(),
       title: title || 'Untitled Document',
       content,
       createdAt: new Date(),
     };
+
+    // Save to IndexedDB
+    await this.saveToIndexedDB(doc);
 
     this.documents.update(docs => [...docs, doc]);
     this.currentDocument.set(doc);
@@ -73,7 +129,14 @@ export class DocumentAnalysisService {
   /**
    * Delete a document
    */
-  deleteDocument(docId: string): void {
+  async deleteDocument(docId: string): Promise<void> {
+    // Delete from IndexedDB
+    try {
+      await this.indexedDB.deleteDocument(Number(docId));
+    } catch (error) {
+      console.error('Failed to delete document from IndexedDB:', error);
+    }
+
     this.documents.update(docs => docs.filter(d => d.id !== docId));
 
     if (this.currentDocument()?.id === docId) {
