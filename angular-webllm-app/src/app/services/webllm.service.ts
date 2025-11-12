@@ -66,7 +66,10 @@ export class WebLLMService {
       const startTime = Date.now();
 
       // Create Web Worker for Web-LLM
-      this.worker = new Worker('/webllm-worker.js', { type: 'module' });
+      // Angular will bundle this worker file automatically
+      this.worker = new Worker(new URL('../../webllm.worker', import.meta.url), {
+        type: 'module'
+      });
 
       // Create engine using Web Worker
       this.engine = await webllm.CreateWebWorkerMLCEngine(

@@ -1,3 +1,5 @@
+/// <reference lib="webworker" />
+
 /**
  * Web-LLM Web Worker
  *
@@ -5,12 +7,12 @@
  * This keeps the UI thread responsive during model operations.
  */
 
-import { WebWorkerMLCEngineHandler } from "@mlc-ai/web-llm";
+import { WebWorkerMLCEngineHandler } from '@mlc-ai/web-llm';
 
 const handler = new WebWorkerMLCEngineHandler();
 
-self.onmessage = (msg) => {
+self.onmessage = (msg: MessageEvent) => {
   handler.onmessage(msg);
 };
 
-console.log("Web-LLM Worker initialized");
+console.log('Web-LLM Worker initialized');
