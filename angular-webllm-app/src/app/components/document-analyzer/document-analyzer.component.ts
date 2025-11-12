@@ -113,6 +113,10 @@ export class DocumentAnalyzerComponent {
     }
   }
 
+  stopAnalysis() {
+    this.docService.stopAnalysis();
+  }
+
   async askQuestion() {
     if (!this.currentQuestion.trim() || this.isAnswering()) return;
 

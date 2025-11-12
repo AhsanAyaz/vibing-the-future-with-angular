@@ -47,6 +47,9 @@ export class DocumentAnalysisService {
   readonly isLoadingDocuments = signal(false);
   readonly isLoadingFile = signal(false);
 
+  // Abort controller for stopping analysis
+  private abortController: AbortController | null = null;
+
   constructor() {
     this.loadDocumentsFromDB();
   }
@@ -164,17 +167,40 @@ export class DocumentAnalysisService {
   }
 
   /**
+   * Stop the current analysis
+   */
+  stopAnalysis(): void {
+    if (this.abortController) {
+      this.abortController.abort();
+      this.abortController = null;
+      this.isAnalyzing.set(false);
+      console.log('Analysis stopped by user');
+    }
+  }
+
+  /**
    * Analyze a document with AI
    */
   async *analyzeDocument(doc: Document): AsyncGenerator<Partial<DocumentAnalysis>> {
+    // Create new abort controller for this analysis
+    this.abortController = new AbortController();
     this.isAnalyzing.set(true);
 
     try {
+      // Check if aborted
+      if (this.abortController.signal.aborted) {
+        throw new Error('Analysis aborted');
+      }
       // Calculate basic stats
       const wordCount = doc.content.split(/\s+/).length;
       const readingTime = Math.ceil(wordCount / 200); // 200 words per minute
 
       yield { wordCount, readingTime };
+
+      // Check if aborted
+      if (this.abortController?.signal.aborted) {
+        throw new Error('Analysis aborted');
+      }
 
       // Generate summary
       const summaryPrompt = `Analyze the following document and provide a concise 2-3 sentence summary:
@@ -187,8 +213,17 @@ Provide ONLY the summary, no additional text.`;
 
       let summary = '';
       for await (const chunk of this.webllm.generateStream(summaryPrompt)) {
+        // Check if aborted during streaming
+        if (this.abortController?.signal.aborted) {
+          throw new Error('Analysis aborted');
+        }
         summary += chunk;
         yield { summary, wordCount, readingTime };
+      }
+
+      // Check if aborted
+      if (this.abortController?.signal.aborted) {
+        throw new Error('Analysis aborted');
       }
 
       // Extract key points
@@ -200,7 +235,16 @@ Format: ["point 1", "point 2", "point 3"]`;
 
       let keyPointsText = '';
       for await (const chunk of this.webllm.generateStream(keyPointsPrompt)) {
+        // Check if aborted during streaming
+        if (this.abortController?.signal.aborted) {
+          throw new Error('Analysis aborted');
+        }
         keyPointsText += chunk;
+      }
+
+      // Check if aborted
+      if (this.abortController?.signal.aborted) {
+        throw new Error('Analysis aborted');
       }
 
       let keyPoints: string[] = [];
@@ -218,6 +262,11 @@ Format: ["point 1", "point 2", "point 3"]`;
 
       yield { summary, keyPoints, wordCount, readingTime };
 
+      // Check if aborted
+      if (this.abortController?.signal.aborted) {
+        throw new Error('Analysis aborted');
+      }
+
       // Analyze sentiment
       const sentimentPrompt = `Analyze the sentiment of this text. Respond with ONLY ONE WORD: positive, neutral, or negative.
 
@@ -225,7 +274,16 @@ ${doc.content}`;
 
       let sentimentText = '';
       for await (const chunk of this.webllm.generateStream(sentimentPrompt)) {
+        // Check if aborted during streaming
+        if (this.abortController?.signal.aborted) {
+          throw new Error('Analysis aborted');
+        }
         sentimentText += chunk;
+      }
+
+      // Check if aborted
+      if (this.abortController?.signal.aborted) {
+        throw new Error('Analysis aborted');
       }
 
       const sentiment = sentimentText.toLowerCase().includes('positive')
@@ -236,6 +294,11 @@ ${doc.content}`;
 
       yield { summary, keyPoints, sentiment, wordCount, readingTime };
 
+      // Check if aborted
+      if (this.abortController?.signal.aborted) {
+        throw new Error('Analysis aborted');
+      }
+
       // Extract topics
       const topicsPrompt = `Identify 3-5 main topics in this document. Return ONLY a JSON array of topic names:
 
@@ -245,7 +308,16 @@ Format: ["topic 1", "topic 2", "topic 3"]`;
 
       let topicsText = '';
       for await (const chunk of this.webllm.generateStream(topicsPrompt)) {
+        // Check if aborted during streaming
+        if (this.abortController?.signal.aborted) {
+          throw new Error('Analysis aborted');
+        }
         topicsText += chunk;
+      }
+
+      // Check if aborted
+      if (this.abortController?.signal.aborted) {
+        throw new Error('Analysis aborted');
       }
 
       let topics: string[] = [];
@@ -280,8 +352,15 @@ Format: ["topic 1", "topic 2", "topic 3"]`;
       }
 
       yield analysis;
+    } catch (error) {
+      if ((error as Error).message === 'Analysis aborted') {
+        console.log('Analysis was stopped by user');
+      } else {
+        throw error;
+      }
     } finally {
       this.isAnalyzing.set(false);
+      this.abortController = null;
     }
   }
 

@@ -17,10 +17,10 @@ export type ModelStatus = 'uninitialized' | 'loading' | 'ready' | 'error';
 /**
  * WebLLM Service - Manages the Web-LLM engine and provides AI capabilities
  *
- * Uses Service Worker for better performance and persistence:
- * - Keeps UI thread responsive during model operations
- * - Maintains model persistence across page visits
- * - Better memory management
+ * Runs on the main thread for better compatibility:
+ * - Direct access to WebGPU for optimal performance
+ * - Simplified architecture without service worker complexity
+ * - Better error handling and debugging
  *
  * This runs 100% in the browser with complete privacy
  */
@@ -51,7 +51,7 @@ export class WebLLMService {
   private conversationHistory: Message[] = [];
 
   /**
-   * Initialize the Web-LLM engine with Service Worker
+   * Initialize the Web-LLM engine on main thread
    */
   async initialize(modelId: string = this.DEFAULT_MODEL): Promise<void> {
     if (this.status() === 'ready') {
@@ -63,7 +63,7 @@ export class WebLLMService {
       this.status.set('loading');
       this.error.set(null);
 
-      // Register service worker if not already registered
+      // Register service worker for future use (not for Web-LLM)
       if ('serviceWorker' in navigator && !this.serviceWorkerRegistration) {
         try {
           this.serviceWorkerRegistration = await navigator.serviceWorker.register(
@@ -71,20 +71,16 @@ export class WebLLMService {
             { scope: '/' }
           );
           console.log('Service Worker registered successfully');
-
-          // Wait for service worker to be ready
-          await navigator.serviceWorker.ready;
         } catch (swError) {
-          console.warn('Service Worker registration failed, falling back to main thread:', swError);
-          // Fallback to main thread if service worker fails
-          return this.initializeMainThread(modelId);
+          console.warn('Service Worker registration failed:', swError);
+          // Continue without service worker
         }
       }
 
       const startTime = Date.now();
 
-      // Create engine using Service Worker
-      this.engine = await webllm.CreateServiceWorkerMLCEngine(modelId, {
+      // Create engine on main thread for better compatibility
+      this.engine = await webllm.CreateMLCEngine(modelId, {
         initProgressCallback: (progress: webllm.InitProgressReport) => {
           const timeElapsed = (Date.now() - startTime) / 1000;
           this.loadProgress.set({
@@ -96,7 +92,7 @@ export class WebLLMService {
       });
 
       this.status.set('ready');
-      console.log('✅ Web-LLM initialized successfully with Service Worker');
+      console.log('✅ Web-LLM initialized successfully on main thread');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       this.error.set(errorMessage);
@@ -106,26 +102,6 @@ export class WebLLMService {
     }
   }
 
-  /**
-   * Fallback: Initialize the Web-LLM engine on main thread
-   */
-  private async initializeMainThread(modelId: string): Promise<void> {
-    const startTime = Date.now();
-
-    this.engine = await webllm.CreateMLCEngine(modelId, {
-      initProgressCallback: (progress: webllm.InitProgressReport) => {
-        const timeElapsed = (Date.now() - startTime) / 1000;
-        this.loadProgress.set({
-          progress: progress.progress,
-          text: progress.text,
-          timeElapsed
-        });
-      },
-    });
-
-    this.status.set('ready');
-    console.log('✅ Web-LLM initialized successfully on main thread');
-  }
 
   /**
    * Generate a completion (non-streaming)

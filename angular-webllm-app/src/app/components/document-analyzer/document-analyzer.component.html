@@ -194,17 +194,21 @@
           <div class="space-y-6">
             <div class="flex items-center justify-between">
               <h2 class="text-2xl font-bold">📊 Document Analysis</h2>
-              <button
-                class="btn btn-primary"
-                [class.btn-disabled]="docService.isAnalyzing()"
-                (click)="analyzeCurrentDocument()">
+              <div class="flex gap-2">
                 @if (docService.isAnalyzing()) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                  Analyzing...
+                  <button
+                    class="btn btn-error"
+                    (click)="stopAnalysis()">
+                    🛑 Stop Analysis
+                  </button>
                 } @else {
-                  🔍 Analyze
+                  <button
+                    class="btn btn-primary"
+                    (click)="analyzeCurrentDocument()">
+                    🔍 Analyze
+                  </button>
                 }
-              </button>
+              </div>
             </div>
 
             @if (docService.isAnalyzing()) {
