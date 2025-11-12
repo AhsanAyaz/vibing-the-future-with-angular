@@ -65,11 +65,29 @@ export class WebLLMService {
 
       const startTime = Date.now();
 
+      console.log('🚀 Creating Web Worker for Web-LLM...');
+
       // Create Web Worker for Web-LLM
       // Angular will bundle this worker file automatically
       this.worker = new Worker(new URL('../../webllm.worker', import.meta.url), {
         type: 'module'
       });
+
+      console.log('✅ Worker created:', this.worker);
+
+      // Add error handler for worker
+      this.worker.onerror = (error) => {
+        console.error('❌ Worker error:', error);
+        this.error.set(`Worker error: ${error.message}`);
+        this.status.set('error');
+      };
+
+      // Add message handler to see what's happening
+      this.worker.onmessage = (msg) => {
+        console.log('📨 Main thread received message from worker:', msg.data);
+      };
+
+      console.log('🔧 Calling CreateWebWorkerMLCEngine with model:', modelId);
 
       // Create engine using Web Worker
       this.engine = await webllm.CreateWebWorkerMLCEngine(
@@ -77,6 +95,7 @@ export class WebLLMService {
         modelId,
         {
           initProgressCallback: (progress: webllm.InitProgressReport) => {
+            console.log('📊 Progress update:', progress);
             const timeElapsed = (Date.now() - startTime) / 1000;
             this.loadProgress.set({
               progress: progress.progress,
@@ -86,6 +105,8 @@ export class WebLLMService {
           },
         }
       );
+
+      console.log('✅ Engine created:', this.engine);
 
       this.status.set('ready');
       console.log('✅ Web-LLM initialized successfully with Web Worker');
