@@ -276,6 +276,82 @@ async send() {
 
 ---
 
+<!-- _class: lead -->
+
+# 💡 Demo: 4 Real-World Examples
+## Built with Angular + Web-LLM
+
+*All running 100% in your browser!*
+
+---
+
+# 📚 Demo 1: Document Analyzer
+
+**What it does:**
+- Upload any document (text, markdown, JSON)
+- Get AI-powered summary and key points
+- Analyze sentiment and extract topics
+- Ask questions about the content
+
+**Use cases:**
+- Legal document review
+- Research paper analysis
+- Contract summarization
+- Meeting notes processing
+
+---
+
+# 📝 Demo 2: Smart Form Assistant
+
+**What it does:**
+- Fill basic info (name, company, role)
+- Click "AI Suggest" to auto-generate descriptions
+- Get context-aware technical requirements
+
+**Use cases:**
+- Project proposals
+- RFP responses
+- Technical documentation
+- Grant applications
+
+**The magic:** AI understands context from previous fields!
+
+---
+
+# 💻 Demo 3: Code Explainer
+
+**What it does:**
+- Paste any code (JS, Python, TypeScript, etc.)
+- Choose explanation level (beginner/intermediate/expert)
+- Get step-by-step breakdown
+- Identify potential issues and improvements
+
+**Use cases:**
+- Code review assistance
+- Learning new languages
+- Debugging complex code
+- Documentation generation
+
+---
+
+# ✉️ Demo 4: Email Generator
+
+**What it does:**
+- Input recipient, subject, and key points
+- Select tone (formal, friendly, casual, persuasive)
+- Generate professional emails
+- Refine with "make shorter," "more formal," etc.
+
+**Use cases:**
+- Client communications
+- Internal announcements
+- Sales outreach
+- Support responses
+
+**Time saved:** 5-10 minutes per email!
+
+---
+
 # ⚡ Performance Tips
 
 ```typescript

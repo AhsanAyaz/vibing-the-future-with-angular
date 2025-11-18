@@ -1,0 +1,169 @@
+<div class="flex gap-4 h-[calc(100vh-200px)]">
+  <!-- Left Panel - Code Input -->
+  <div class="w-1/2 glass-effect rounded-2xl p-6 flex flex-col">
+    <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+      <span class="text-3xl">💻</span>
+      <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Code Explainer</span>
+    </h2>
+    <p class="text-base-content/70 mb-6">Paste any code and get AI-powered explanations!</p>
+
+    <!-- Controls -->
+    <div class="grid grid-cols-3 gap-3 mb-4">
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-semibold">Language</span>
+        </label>
+        <select [(ngModel)]="selectedLanguage" class="select select-bordered select-sm">
+          <option value="javascript">JavaScript</option>
+          <option value="typescript">TypeScript</option>
+          <option value="python">Python</option>
+          <option value="java">Java</option>
+          <option value="csharp">C#</option>
+          <option value="go">Go</option>
+        </select>
+      </div>
+
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-semibold">Level</span>
+        </label>
+        <select [(ngModel)]="explanationLevel" class="select select-bordered select-sm">
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="expert">Expert</option>
+        </select>
+      </div>
+
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-semibold">Quick Start</span>
+        </label>
+        <button
+          type="button"
+          class="btn btn-outline btn-secondary btn-sm"
+          (click)="loadSample()">
+          📋 Load Sample
+        </button>
+      </div>
+    </div>
+
+    <!-- Code Input -->
+    <div class="form-control flex-1">
+      <label class="label">
+        <span class="label-text font-semibold">Your Code</span>
+        <span class="label-text-alt">{{ codeInput.split('\n').length }} lines</span>
+      </label>
+      <textarea
+        [(ngModel)]="codeInput"
+        placeholder="Paste your code here..."
+        class="textarea textarea-bordered w-full h-full font-mono text-sm resize-none"
+        spellcheck="false"></textarea>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex gap-2 mt-4">
+      <button
+        class="btn btn-primary flex-1"
+        (click)="explainCode()"
+        [disabled]="!webllm.isReady() || isExplaining() || !codeInput.trim()">
+        @if (isExplaining()) {
+          <span class="loading loading-spinner loading-sm"></span>
+          Analyzing...
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+            <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+          </svg>
+          Explain Code
+        }
+      </button>
+      <button class="btn btn-ghost" (click)="clearAll()">
+        Clear
+      </button>
+    </div>
+
+    @if (!webllm.isReady()) {
+      <div class="alert alert-warning mt-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span>Please initialize the AI model first (click "Initialize Model" button above)</span>
+      </div>
+    }
+  </div>
+
+  <!-- Right Panel - Explanation -->
+  <div class="w-1/2 glass-effect rounded-2xl p-6 flex flex-col">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-bold flex items-center gap-2">
+        <span class="text-3xl">📖</span>
+        <span class="bg-gradient-to-r from-accent to-secondary bg-clip-text text-transparent">Explanation</span>
+      </h2>
+      @if (explanation()) {
+        <button class="btn btn-ghost btn-sm" (click)="copyExplanation()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+            <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+          </svg>
+          Copy
+        </button>
+      }
+    </div>
+
+    <div class="flex-1 overflow-y-auto">
+      @if (isExplaining()) {
+        <!-- Streaming explanation -->
+        <div class="prose prose-sm max-w-none">
+          <div class="whitespace-pre-wrap">{{ streamingExplanation() }}<span class="animate-pulse">|</span></div>
+        </div>
+      } @else if (explanation()) {
+        <!-- Final explanation -->
+        <div class="prose prose-sm max-w-none">
+          <div class="whitespace-pre-wrap">{{ explanation() }}</div>
+        </div>
+      } @else {
+        <!-- Empty state -->
+        <div class="flex flex-col items-center justify-center h-full text-center">
+          <div class="text-7xl mb-6 opacity-50">🤔</div>
+          <h3 class="text-xl font-semibold mb-3">No Explanation Yet</h3>
+          <p class="text-base-content/70 max-w-md">
+            Paste your code in the left panel and click "Explain Code" to get
+            AI-powered insights about how your code works!
+          </p>
+
+          <div class="mt-8 space-y-2 text-sm text-left">
+            <p class="flex items-center gap-2">
+              <span class="badge badge-success badge-sm">✓</span>
+              <span>Step-by-step breakdown</span>
+            </p>
+            <p class="flex items-center gap-2">
+              <span class="badge badge-success badge-sm">✓</span>
+              <span>Identify potential issues</span>
+            </p>
+            <p class="flex items-center gap-2">
+              <span class="badge badge-success badge-sm">✓</span>
+              <span>Improvement suggestions</span>
+            </p>
+            <p class="flex items-center gap-2">
+              <span class="badge badge-success badge-sm">✓</span>
+              <span>Best practices</span>
+            </p>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (explanation()) {
+      <div class="divider mt-4"></div>
+      <div class="alert alert-info">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="text-sm">
+          This explanation was generated by AI running <strong>100% in your browser</strong>.
+          Your code never leaves your device!
+        </span>
+      </div>
+    }
+  </div>
+</div>

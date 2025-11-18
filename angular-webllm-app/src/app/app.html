@@ -9,9 +9,27 @@
             <h1 class="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               {{ title }}
             </h1>
-            <p class="text-sm text-base-content/70">AI-Powered Document Analysis • 100% Private • Web-LLM</p>
+            <p class="text-sm text-base-content/70">Web-LLM • 100% Private • On-Device AI</p>
           </div>
         </div>
+
+        <!-- Navigation Menu (shown when model is ready) -->
+        @if (webllm.isReady()) {
+          <nav class="flex gap-2">
+            <a routerLink="/document-analyzer" routerLinkActive="btn-primary" class="btn btn-sm btn-ghost">
+              📚 Documents
+            </a>
+            <a routerLink="/smart-form" routerLinkActive="btn-primary" class="btn btn-sm btn-ghost">
+              📝 Smart Form
+            </a>
+            <a routerLink="/code-explainer" routerLinkActive="btn-primary" class="btn btn-sm btn-ghost">
+              💻 Code
+            </a>
+            <a routerLink="/email-generator" routerLinkActive="btn-primary" class="btn btn-sm btn-ghost">
+              ✉️ Email
+            </a>
+          </nav>
+        }
 
         <div class="flex items-center gap-3">
           @if (webllm.isReady()) {
@@ -144,8 +162,8 @@
         </div>
       </div>
     } @else {
-      <!-- Document Analyzer -->
-      <app-document-analyzer></app-document-analyzer>
+      <!-- Router Outlet for all components -->
+      <router-outlet></router-outlet>
     }
   </main>
 

@@ -1,8 +1,8 @@
 import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { WebLLMService } from './services/webllm.service';
 import { DocumentAnalysisService } from './services/document-analysis.service';
-import { DocumentAnalyzerComponent } from './components/document-analyzer/document-analyzer.component';
 
 /**
  * App Component - Main Application Shell
@@ -31,11 +31,11 @@ import { DocumentAnalyzerComponent } from './components/document-analyzer/docume
   selector: 'app-root',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, DocumentAnalyzerComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.html'
 })
 export class App implements OnInit {
-  protected readonly title = 'Smart Document Analyzer';
+  protected readonly title = 'AI-Powered Angular Demos';
 
   readonly webllm = inject(WebLLMService);
   readonly docService = inject(DocumentAnalysisService);
