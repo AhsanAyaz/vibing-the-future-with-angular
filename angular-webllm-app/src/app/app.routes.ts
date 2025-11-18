@@ -5,7 +5,6 @@ import { CodeExplainerComponent } from './components/code-explainer/code-explain
 import { EmailGeneratorComponent } from './components/email-generator/email-generator.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/document-analyzer', pathMatch: 'full' },
   { path: 'document-analyzer', component: DocumentAnalyzerComponent },
   { path: 'smart-form', component: SmartFormComponent },
   { path: 'code-explainer', component: CodeExplainerComponent },

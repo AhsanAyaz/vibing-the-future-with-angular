@@ -1,6 +1,6 @@
 import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { WebLLMService } from './services/webllm.service';
 import { DocumentAnalysisService } from './services/document-analysis.service';
 
@@ -39,6 +39,7 @@ export class App implements OnInit {
 
   readonly webllm = inject(WebLLMService);
   readonly docService = inject(DocumentAnalysisService);
+  private readonly router = inject(Router);
 
   readonly showInitializer = computed(() => !this.webllm.isReady());
 
@@ -50,6 +51,8 @@ export class App implements OnInit {
   async initializeModel() {
     try {
       await this.webllm.initialize();
+      // Navigate to document analyzer after successful initialization
+      await this.router.navigate(['/document-analyzer']);
     } catch (error) {
       console.error('Failed to initialize model:', error);
     }
