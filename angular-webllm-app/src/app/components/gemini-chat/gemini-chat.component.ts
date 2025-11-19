@@ -37,6 +37,9 @@ export class GeminiChatComponent {
   private genAI: GoogleGenerativeAI | null = null;
   private model: any = null;
 
+  // LocalStorage key for API key persistence
+  private readonly STORAGE_KEY = 'gemini-api-key';
+
   // State
   readonly messages = signal<Message[]>([]);
   readonly isStreaming = signal(false);
@@ -47,6 +50,24 @@ export class GeminiChatComponent {
 
   // Input
   currentMessage = '';
+
+  constructor() {
+    // Try to load saved API key from localStorage
+    this.loadSavedApiKey();
+  }
+
+  private loadSavedApiKey() {
+    try {
+      const savedKey = localStorage.getItem(this.STORAGE_KEY);
+      if (savedKey) {
+        this.apiKey.set(savedKey);
+        // Auto-configure with saved key
+        this.configureGemini();
+      }
+    } catch (err) {
+      console.warn('Could not load saved API key:', err);
+    }
+  }
 
   configureGemini() {
     const key = this.apiKey().trim();
@@ -60,10 +81,34 @@ export class GeminiChatComponent {
       this.model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
       this.isConfigured.set(true);
       this.error.set(null);
+
+      // Save API key to localStorage for future sessions
+      try {
+        localStorage.setItem(this.STORAGE_KEY, key);
+      } catch (storageErr) {
+        console.warn('Could not save API key to localStorage:', storageErr);
+      }
+
       console.log('✅ Gemini configured successfully');
     } catch (err) {
       this.error.set('Failed to configure Gemini. Check your API key.');
       console.error('Gemini configuration error:', err);
+    }
+  }
+
+  clearApiKey() {
+    if (confirm('Clear saved API key? You will need to enter it again next time.')) {
+      try {
+        localStorage.removeItem(this.STORAGE_KEY);
+      } catch (err) {
+        console.warn('Could not clear API key from localStorage:', err);
+      }
+
+      this.apiKey.set('');
+      this.isConfigured.set(false);
+      this.messages.set([]);
+      this.genAI = null;
+      this.model = null;
     }
   }
 
