@@ -129,7 +129,7 @@
                 <div class="flex items-center gap-2">
                   <span class="text-2xl">{{ getQuestionTypeIcon(currentQuestion()!.type) }}</span>
                   <div>
-                    <h3 class="card-title text-lg">Question {{ totalQuestions() + 1 }}</h3>
+                    <h3 class="card-title text-lg">Question {{ results().length + 1 }}</h3>
                     <p class="text-xs text-base-content/60">{{ getQuestionTypeLabel(currentQuestion()!.type) }}</p>
                   </div>
                 </div>
@@ -290,20 +290,33 @@
           </div>
 
           <!-- Last Result Feedback -->
-          @if (results().length > 0) {
+          @if (showLastResult() && results().length > 0) {
             @let lastResult = results()[results().length - 1];
-            <div class="alert" [class.alert-success]="lastResult.correct" [class.alert-error]="!lastResult.correct">
+            <div class="alert quiz-fade-in" [class.alert-success]="lastResult.correct" [class.alert-error]="!lastResult.correct">
               <div class="flex-1">
                 @if (lastResult.correct) {
                   <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span><strong>Correct!</strong> Great job! Moving to next question...</span>
+                  <div>
+                    <div><strong>Correct!</strong> Great job!</div>
+                    @if (lastResult.question.explanation) {
+                      <div class="text-sm mt-1 opacity-90">{{ lastResult.question.explanation }}</div>
+                    }
+                  </div>
                 } @else {
                   <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span><strong>Not quite!</strong> The AI will adjust difficulty. Next question coming...</span>
+                  <div>
+                    <div><strong>Not quite!</strong></div>
+                    @if (lastResult.incorrectReason) {
+                      <div class="text-sm mt-1">{{ lastResult.incorrectReason }}</div>
+                    }
+                    @if (lastResult.question.explanation) {
+                      <div class="text-sm mt-1 opacity-90"><strong>Explanation:</strong> {{ lastResult.question.explanation }}</div>
+                    }
+                  </div>
                 }
               </div>
             </div>
