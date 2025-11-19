@@ -2,6 +2,7 @@ import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { MarkdownService } from '../../services/markdown.service';
 
 interface Message {
   id: string;
@@ -29,6 +30,9 @@ interface Message {
   templateUrl: './gemini-chat.component.html'
 })
 export class GeminiChatComponent {
+  // Services
+  readonly markdown = inject(MarkdownService);
+
   // Gemini setup
   private genAI: GoogleGenerativeAI | null = null;
   private model: any = null;

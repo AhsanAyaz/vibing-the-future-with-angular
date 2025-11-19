@@ -113,13 +113,12 @@
     <div class="flex-1 overflow-y-auto">
       @if (isExplaining()) {
         <!-- Streaming explanation -->
-        <div class="prose prose-sm max-w-none">
-          <div class="whitespace-pre-wrap">{{ streamingExplanation() }}<span class="animate-pulse">|</span></div>
+        <div class="prose prose-sm max-w-none prose-invert" [innerHTML]="markdown.toHtml(streamingExplanation())">
         </div>
+        <span class="animate-pulse">|</span>
       } @else if (explanation()) {
         <!-- Final explanation -->
-        <div class="prose prose-sm max-w-none">
-          <div class="whitespace-pre-wrap">{{ explanation() }}</div>
+        <div class="prose prose-sm max-w-none prose-invert" [innerHTML]="markdown.toHtml(explanation())">
         </div>
       } @else {
         <!-- Empty state -->

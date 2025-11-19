@@ -113,7 +113,11 @@
                 <div class="chat-bubble"
                      [class.chat-bubble-primary]="msg.role === 'user'"
                      [class.chat-bubble-secondary]="msg.role === 'assistant'">
-                  <div class="whitespace-pre-wrap">{{ msg.content }}</div>
+                  @if (msg.role === 'user') {
+                    <div class="whitespace-pre-wrap">{{ msg.content }}</div>
+                  } @else {
+                    <div class="prose prose-sm max-w-none prose-invert" [innerHTML]="markdown.toHtml(msg.content)"></div>
+                  }
                 </div>
               </div>
             }

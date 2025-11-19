@@ -152,12 +152,13 @@
               @if (isGenerating()) {
                 <!-- Streaming email -->
                 <div class="bg-base-200 rounded-lg p-4">
-                  <div class="whitespace-pre-wrap font-mono text-sm">{{ streamingEmail() }}<span class="animate-pulse">|</span></div>
+                  <div class="prose prose-sm max-w-none prose-invert" [innerHTML]="markdown.toHtml(streamingEmail())"></div>
+                  <span class="animate-pulse">|</span>
                 </div>
               } @else if (generatedEmail()) {
                 <!-- Final email -->
                 <div class="bg-base-100 rounded-lg p-6 shadow-sm">
-                  <div class="whitespace-pre-wrap text-sm leading-relaxed">{{ generatedEmail() }}</div>
+                  <div class="prose prose-sm max-w-none prose-invert" [innerHTML]="markdown.toHtml(generatedEmail())"></div>
                 </div>
 
                 <!-- Email Actions -->

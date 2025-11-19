@@ -2,6 +2,7 @@ import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WebLLMService } from '../../services/webllm.service';
+import { MarkdownService } from '../../services/markdown.service';
 
 interface ExplanationSection {
   title: string;
@@ -26,6 +27,7 @@ interface ExplanationSection {
 })
 export class CodeExplainerComponent {
   readonly webllm = inject(WebLLMService);
+  readonly markdown = inject(MarkdownService);
 
   // Code input
   codeInput = '';
