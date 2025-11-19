@@ -3,20 +3,65 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WebLLMService } from '../../services/webllm.service';
 
-interface QuizQuestion {
+type QuestionType = 'multiple-choice' | 'text-input' | 'slider' | 'code-completion' | 'true-false-confidence' | 'multi-select';
+
+interface BaseQuestion {
   id: string;
+  type: QuestionType;
   question: string;
-  options: string[];
-  correctAnswer: number;
   difficulty: 'easy' | 'medium' | 'hard';
   explanation?: string;
 }
 
+interface MultipleChoiceQuestion extends BaseQuestion {
+  type: 'multiple-choice';
+  options: string[];
+  correctAnswer: number;
+}
+
+interface TextInputQuestion extends BaseQuestion {
+  type: 'text-input';
+  correctAnswer: string;
+  acceptableAnswers?: string[];
+  caseSensitive?: boolean;
+}
+
+interface SliderQuestion extends BaseQuestion {
+  type: 'slider';
+  min: number;
+  max: number;
+  correctAnswer: number;
+  tolerance: number;
+  unit?: string;
+}
+
+interface CodeCompletionQuestion extends BaseQuestion {
+  type: 'code-completion';
+  code: string;
+  correctAnswer: string;
+  acceptableAnswers?: string[];
+}
+
+interface TrueFalseConfidenceQuestion extends BaseQuestion {
+  type: 'true-false-confidence';
+  correctAnswer: boolean;
+}
+
+interface MultiSelectQuestion extends BaseQuestion {
+  type: 'multi-select';
+  options: string[];
+  correctAnswers: number[];
+}
+
+type QuizQuestion = MultipleChoiceQuestion | TextInputQuestion | SliderQuestion |
+                    CodeCompletionQuestion | TrueFalseConfidenceQuestion | MultiSelectQuestion;
+
 interface QuizResult {
   questionId: string;
   correct: boolean;
-  userAnswer: number;
+  userAnswer: any; // Can be number, string, number[], boolean, or {answer: boolean, confidence: number}
   timeTaken: number;
+  questionType: QuestionType;
 }
 
 /**
@@ -47,8 +92,14 @@ export class AdaptiveQuizComponent {
   readonly isStarted = signal(false);
   readonly quizTopic = signal('');
 
-  // User interaction
-  selectedAnswer = signal<number | null>(null);
+  // User interaction - different types for different questions
+  selectedAnswer = signal<number | null>(null); // for multiple-choice
+  textAnswer = signal<string>(''); // for text-input
+  sliderValue = signal<number>(0); // for slider
+  codeAnswer = signal<string>(''); // for code-completion
+  trueFalseAnswer = signal<boolean | null>(null); // for true-false-confidence
+  confidenceLevel = signal<number>(50); // for true-false-confidence (0-100)
+  selectedMultiple = signal<Set<number>>(new Set()); // for multi-select
   questionStartTime = 0;
 
   // Computed
@@ -85,28 +136,92 @@ export class AdaptiveQuizComponent {
 
   async generateQuestion() {
     this.isGenerating.set(true);
-    this.selectedAnswer.set(null);
+    this.resetAnswers();
 
     try {
       const difficulty = this.currentDifficulty();
       const resultsContext = this.getResultsContext();
+      const usedTypes = this.getRecentQuestionTypes();
 
-      const prompt = `You are a programming quiz generator. Generate a ${difficulty} difficulty multiple choice question about: ${this.quizTopic()}
+      const prompt = `You are an intelligent programming quiz generator. Generate a ${difficulty} difficulty question about: ${this.quizTopic()}
 
 ${resultsContext}
 
-Requirements:
-- Question should be ${difficulty} difficulty
-- Provide exactly 4 options
-- Indicate which option is correct (0-3)
-- Include a brief explanation
+IMPORTANT: Choose the BEST question type for the content. Vary question types to keep it interesting.
+Recent types used: ${usedTypes.join(', ') || 'none yet'}
 
-Respond ONLY with valid JSON in this exact format:
+Available question types:
+1. "multiple-choice" - Traditional 4 options (best for concepts, comparisons)
+2. "text-input" - Type exact answer (best for syntax, commands, API names)
+3. "slider" - Estimate a number (best for percentages, performance metrics, sizes)
+4. "code-completion" - Fill in the blank in code (best for syntax patterns)
+5. "true-false-confidence" - True/false with confidence slider (best for facts, misconceptions)
+6. "multi-select" - Select all correct answers (best when multiple things apply)
+
+Requirements:
+- Choose the question type that BEST tests this knowledge
+- Question should be ${difficulty} difficulty
+- Include a brief explanation
+- Respond ONLY with valid JSON
+
+Format examples:
+
+MULTIPLE-CHOICE:
 {
-  "question": "the question text",
-  "options": ["option1", "option2", "option3", "option4"],
+  "type": "multiple-choice",
+  "question": "Which lifecycle hook runs after component initialization?",
+  "options": ["ngOnInit", "ngAfterViewInit", "constructor", "ngOnChanges"],
   "correctAnswer": 0,
-  "explanation": "why this is correct"
+  "explanation": "ngOnInit runs after the component is initialized"
+}
+
+TEXT-INPUT:
+{
+  "type": "text-input",
+  "question": "What Angular CLI command creates a new component?",
+  "correctAnswer": "ng generate component",
+  "acceptableAnswers": ["ng g c", "ng generate component", "ng g component"],
+  "caseSensitive": false,
+  "explanation": "The command is 'ng generate component' or 'ng g c' for short"
+}
+
+SLIDER:
+{
+  "type": "slider",
+  "question": "What percentage of web apps fail Core Web Vitals in 2025?",
+  "min": 0,
+  "max": 100,
+  "correctAnswer": 90,
+  "tolerance": 5,
+  "unit": "%",
+  "explanation": "About 90% of web apps fail Core Web Vitals"
+}
+
+CODE-COMPLETION:
+{
+  "type": "code-completion",
+  "question": "Complete this Angular signal declaration:",
+  "code": "readonly count = _____(0);",
+  "correctAnswer": "signal",
+  "acceptableAnswers": ["signal"],
+  "explanation": "Use signal() to create a writable signal"
+}
+
+TRUE-FALSE-CONFIDENCE:
+{
+  "type": "true-false-confidence",
+  "question": "Angular Signals eliminate the need for Zone.js",
+  "correctAnswer": true,
+  "explanation": "Signals enable zoneless change detection in Angular"
+}
+
+MULTI-SELECT:
+{
+  "type": "multi-select",
+  "question": "Which of these are valid Angular lifecycle hooks?",
+  "options": ["ngOnInit", "ngOnStart", "ngAfterViewInit", "ngBeforeDestroy", "ngOnDestroy"],
+  "correctAnswers": [0, 2, 4],
+  "explanation": "ngOnInit, ngAfterViewInit, and ngOnDestroy are valid hooks"
 }`;
 
       let response = '';
@@ -121,15 +236,7 @@ Respond ONLY with valid JSON in this exact format:
       }
 
       const parsed = JSON.parse(jsonMatch[0]);
-
-      const question: QuizQuestion = {
-        id: crypto.randomUUID(),
-        question: parsed.question,
-        options: parsed.options,
-        correctAnswer: parsed.correctAnswer,
-        difficulty,
-        explanation: parsed.explanation
-      };
+      const question = this.createQuestionFromParsed(parsed, difficulty);
 
       this.currentQuestion.set(question);
       this.questionStartTime = Date.now();
@@ -141,29 +248,242 @@ Respond ONLY with valid JSON in this exact format:
     }
   }
 
-  async submitAnswer() {
-    const answer = this.selectedAnswer();
-    const question = this.currentQuestion();
+  private resetAnswers() {
+    this.selectedAnswer.set(null);
+    this.textAnswer.set('');
+    this.sliderValue.set(0);
+    this.codeAnswer.set('');
+    this.trueFalseAnswer.set(null);
+    this.confidenceLevel.set(50);
+    this.selectedMultiple.set(new Set());
+  }
 
-    if (answer === null || !question) return;
+  private createQuestionFromParsed(parsed: any, difficulty: 'easy' | 'medium' | 'hard'): QuizQuestion {
+    const baseQuestion = {
+      id: crypto.randomUUID(),
+      difficulty,
+      question: parsed.question,
+      explanation: parsed.explanation
+    };
+
+    switch (parsed.type) {
+      case 'text-input':
+        return {
+          ...baseQuestion,
+          type: 'text-input',
+          correctAnswer: parsed.correctAnswer,
+          acceptableAnswers: parsed.acceptableAnswers || [parsed.correctAnswer],
+          caseSensitive: parsed.caseSensitive ?? false
+        } as TextInputQuestion;
+
+      case 'slider':
+        this.sliderValue.set(parsed.min + (parsed.max - parsed.min) / 2); // Set to middle
+        return {
+          ...baseQuestion,
+          type: 'slider',
+          min: parsed.min,
+          max: parsed.max,
+          correctAnswer: parsed.correctAnswer,
+          tolerance: parsed.tolerance,
+          unit: parsed.unit || ''
+        } as SliderQuestion;
+
+      case 'code-completion':
+        return {
+          ...baseQuestion,
+          type: 'code-completion',
+          code: parsed.code,
+          correctAnswer: parsed.correctAnswer,
+          acceptableAnswers: parsed.acceptableAnswers || [parsed.correctAnswer]
+        } as CodeCompletionQuestion;
+
+      case 'true-false-confidence':
+        return {
+          ...baseQuestion,
+          type: 'true-false-confidence',
+          correctAnswer: parsed.correctAnswer
+        } as TrueFalseConfidenceQuestion;
+
+      case 'multi-select':
+        return {
+          ...baseQuestion,
+          type: 'multi-select',
+          options: parsed.options,
+          correctAnswers: parsed.correctAnswers
+        } as MultiSelectQuestion;
+
+      case 'multiple-choice':
+      default:
+        return {
+          ...baseQuestion,
+          type: 'multiple-choice',
+          options: parsed.options,
+          correctAnswer: parsed.correctAnswer
+        } as MultipleChoiceQuestion;
+    }
+  }
+
+  private getRecentQuestionTypes(): string[] {
+    return this.results()
+      .slice(-3)
+      .map(r => r.questionType);
+  }
+
+  async submitAnswer() {
+    const question = this.currentQuestion();
+    if (!question) return;
+
+    const { userAnswer, isCorrect } = this.validateAnswer(question);
+    if (userAnswer === null) return; // No answer provided
 
     const timeTaken = Math.round((Date.now() - this.questionStartTime) / 1000);
-    const isCorrect = answer === question.correctAnswer;
 
     const result: QuizResult = {
       questionId: question.id,
       correct: isCorrect,
-      userAnswer: answer,
-      timeTaken
+      userAnswer,
+      timeTaken,
+      questionType: question.type
     };
 
     this.results.update(results => [...results, result]);
 
     // Show brief feedback before next question
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Generate next question
     await this.generateQuestion();
+  }
+
+  private validateAnswer(question: QuizQuestion): { userAnswer: any; isCorrect: boolean } {
+    switch (question.type) {
+      case 'multiple-choice': {
+        const answer = this.selectedAnswer();
+        if (answer === null) return { userAnswer: null, isCorrect: false };
+        return {
+          userAnswer: answer,
+          isCorrect: answer === question.correctAnswer
+        };
+      }
+
+      case 'text-input': {
+        const answer = this.textAnswer().trim();
+        if (!answer) return { userAnswer: null, isCorrect: false };
+
+        const compareAnswer = question.caseSensitive ? answer : answer.toLowerCase();
+        const acceptableAnswers = question.acceptableAnswers || [question.correctAnswer];
+        const isCorrect = acceptableAnswers.some(acceptable => {
+          const compareAcceptable = question.caseSensitive ? acceptable : acceptable.toLowerCase();
+          return compareAnswer === compareAcceptable;
+        });
+
+        return { userAnswer: answer, isCorrect };
+      }
+
+      case 'slider': {
+        const answer = this.sliderValue();
+        const difference = Math.abs(answer - question.correctAnswer);
+        const isCorrect = difference <= question.tolerance;
+        return { userAnswer: answer, isCorrect };
+      }
+
+      case 'code-completion': {
+        const answer = this.codeAnswer().trim();
+        if (!answer) return { userAnswer: null, isCorrect: false };
+
+        const acceptableAnswers = question.acceptableAnswers || [question.correctAnswer];
+        const isCorrect = acceptableAnswers.some(acceptable =>
+          answer.toLowerCase() === acceptable.toLowerCase()
+        );
+
+        return { userAnswer: answer, isCorrect };
+      }
+
+      case 'true-false-confidence': {
+        const answer = this.trueFalseAnswer();
+        if (answer === null) return { userAnswer: null, isCorrect: false };
+
+        const confidence = this.confidenceLevel();
+        const isCorrect = answer === question.correctAnswer;
+
+        return {
+          userAnswer: { answer, confidence },
+          isCorrect
+        };
+      }
+
+      case 'multi-select': {
+        const selected = Array.from(this.selectedMultiple());
+        if (selected.length === 0) return { userAnswer: null, isCorrect: false };
+
+        const correctSet = new Set(question.correctAnswers);
+        const isCorrect = selected.length === correctSet.size &&
+                         selected.every(idx => correctSet.has(idx));
+
+        return { userAnswer: selected, isCorrect };
+      }
+
+      default:
+        return { userAnswer: null, isCorrect: false };
+    }
+  }
+
+  toggleMultiSelect(index: number) {
+    this.selectedMultiple.update(set => {
+      const newSet = new Set(set);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  }
+
+  canSubmit(): boolean {
+    const question = this.currentQuestion();
+    if (!question) return false;
+
+    switch (question.type) {
+      case 'multiple-choice':
+        return this.selectedAnswer() !== null;
+      case 'text-input':
+        return this.textAnswer().trim().length > 0;
+      case 'slider':
+        return true; // Always can submit slider
+      case 'code-completion':
+        return this.codeAnswer().trim().length > 0;
+      case 'true-false-confidence':
+        return this.trueFalseAnswer() !== null;
+      case 'multi-select':
+        return this.selectedMultiple().size > 0;
+      default:
+        return false;
+    }
+  }
+
+  getQuestionTypeIcon(type: QuestionType): string {
+    switch (type) {
+      case 'multiple-choice': return '🎯';
+      case 'text-input': return '⌨️';
+      case 'slider': return '🎚️';
+      case 'code-completion': return '💻';
+      case 'true-false-confidence': return '🤔';
+      case 'multi-select': return '☑️';
+      default: return '❓';
+    }
+  }
+
+  getQuestionTypeLabel(type: QuestionType): string {
+    switch (type) {
+      case 'multiple-choice': return 'Multiple Choice';
+      case 'text-input': return 'Type Answer';
+      case 'slider': return 'Estimate Value';
+      case 'code-completion': return 'Complete Code';
+      case 'true-false-confidence': return 'True/False';
+      case 'multi-select': return 'Select All';
+      default: return 'Unknown';
+    }
   }
 
   restartQuiz() {

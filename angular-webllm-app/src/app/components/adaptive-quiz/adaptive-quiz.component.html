@@ -47,14 +47,14 @@
               <p class="text-xs text-base-content/60 mt-1">Questions adjust to your level</p>
             </div>
             <div class="bg-base-200 rounded-lg p-4 text-center">
-              <div class="text-3xl mb-2">📈</div>
-              <strong class="text-sm">Real-time</strong>
-              <p class="text-xs text-base-content/60 mt-1">Difficulty changes as you learn</p>
+              <div class="text-3xl mb-2">🎯</div>
+              <strong class="text-sm">6 Question Types</strong>
+              <p class="text-xs text-base-content/60 mt-1">AI chooses best format for content</p>
             </div>
             <div class="bg-base-200 rounded-lg p-4 text-center">
               <div class="text-3xl mb-2">🎨</div>
               <strong class="text-sm">Dynamic UI</strong>
-              <p class="text-xs text-base-content/60 mt-1">Questions generated on-the-fly</p>
+              <p class="text-xs text-base-content/60 mt-1">Interface adapts to question type</p>
             </div>
           </div>
 
@@ -123,10 +123,16 @@
           </div>
         } @else if (currentQuestion()) {
           <!-- Question Card -->
-          <div class="card bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20">
+          <div class="card bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 quiz-fade-in">
             <div class="card-body">
               <div class="flex items-center justify-between mb-4">
-                <h3 class="card-title text-lg">Question {{ totalQuestions() + 1 }}</h3>
+                <div class="flex items-center gap-2">
+                  <span class="text-2xl">{{ getQuestionTypeIcon(currentQuestion()!.type) }}</span>
+                  <div>
+                    <h3 class="card-title text-lg">Question {{ totalQuestions() + 1 }}</h3>
+                    <p class="text-xs text-base-content/60">{{ getQuestionTypeLabel(currentQuestion()!.type) }}</p>
+                  </div>
+                </div>
                 <div class="badge badge-lg"
                      [class.badge-success]="currentQuestion()!.difficulty === 'easy'"
                      [class.badge-warning]="currentQuestion()!.difficulty === 'medium'"
@@ -138,26 +144,162 @@
 
               <p class="text-lg mb-6 leading-relaxed">{{ currentQuestion()!.question }}</p>
 
-              <div class="space-y-3">
-                @for (option of currentQuestion()!.options; track $index) {
-                  <label class="flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all hover:bg-base-200"
-                         [class.border-primary]="selectedAnswer() === $index"
-                         [class.bg-primary/10]="selectedAnswer() === $index">
-                    <input
-                      type="radio"
-                      name="answer"
-                      [value]="$index"
-                      [(ngModel)]="selectedAnswer"
-                      class="radio radio-primary mt-1" />
-                    <span class="flex-1">{{ option }}</span>
+              <!-- MULTIPLE CHOICE -->
+              @if (currentQuestion()!.type === 'multiple-choice') {
+                <div class="space-y-3">
+                  @for (option of currentQuestion()!.options; track $index) {
+                    <label class="flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all hover:bg-base-200"
+                           [class.border-primary]="selectedAnswer() === $index"
+                           [class.bg-primary/10]="selectedAnswer() === $index">
+                      <input
+                        type="radio"
+                        name="answer"
+                        [value]="$index"
+                        [(ngModel)]="selectedAnswer"
+                        class="radio radio-primary mt-1" />
+                      <span class="flex-1">{{ option }}</span>
+                    </label>
+                  }
+                </div>
+              }
+
+              <!-- TEXT INPUT -->
+              @if (currentQuestion()!.type === 'text-input') {
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-semibold">Type your answer:</span>
                   </label>
-                }
-              </div>
+                  <input
+                    type="text"
+                    [(ngModel)]="textAnswer"
+                    (keyup.enter)="submitAnswer()"
+                    placeholder="Enter your answer..."
+                    class="input input-bordered input-lg w-full font-mono"
+                    autofocus />
+                  <label class="label">
+                    <span class="label-text-alt">Press Enter to submit</span>
+                  </label>
+                </div>
+              }
+
+              <!-- SLIDER -->
+              @if (currentQuestion()!.type === 'slider') {
+                @let sliderQ = currentQuestion()!;
+                <div class="form-control space-y-4">
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm text-base-content/70">{{ sliderQ.min }}{{ sliderQ.unit }}</span>
+                    <div class="text-center">
+                      <div class="text-3xl font-bold text-primary">{{ sliderValue() }}{{ sliderQ.unit }}</div>
+                      <div class="text-xs text-base-content/60">Your estimate</div>
+                    </div>
+                    <span class="text-sm text-base-content/70">{{ sliderQ.max }}{{ sliderQ.unit }}</span>
+                  </div>
+                  <input
+                    type="range"
+                    [min]="sliderQ.min"
+                    [max]="sliderQ.max"
+                    [(ngModel)]="sliderValue"
+                    class="range range-primary"
+                    step="1" />
+                  <div class="text-xs text-center text-base-content/60">
+                    Drag to estimate the value
+                  </div>
+                </div>
+              }
+
+              <!-- CODE COMPLETION -->
+              @if (currentQuestion()!.type === 'code-completion') {
+                @let codeQ = currentQuestion()!;
+                <div class="form-control space-y-3">
+                  <div class="mockup-code bg-base-300">
+                    <pre><code>{{ codeQ.code.replace('_____', '     ') }}</code></pre>
+                  </div>
+                  <label class="label">
+                    <span class="label-text font-semibold">Fill in the blank:</span>
+                  </label>
+                  <input
+                    type="text"
+                    [(ngModel)]="codeAnswer"
+                    (keyup.enter)="submitAnswer()"
+                    placeholder="Type the missing code..."
+                    class="input input-bordered input-lg w-full font-mono text-center text-xl"
+                    autofocus />
+                </div>
+              }
+
+              <!-- TRUE/FALSE WITH CONFIDENCE -->
+              @if (currentQuestion()!.type === 'true-false-confidence') {
+                <div class="space-y-6">
+                  <div class="grid grid-cols-2 gap-4">
+                    <button
+                      class="btn btn-lg h-24"
+                      [class.btn-success]="trueFalseAnswer() === true"
+                      [class.btn-outline]="trueFalseAnswer() !== true"
+                      (click)="trueFalseAnswer.set(true)">
+                      <span class="text-4xl">✓</span>
+                      <span class="ml-2">TRUE</span>
+                    </button>
+                    <button
+                      class="btn btn-lg h-24"
+                      [class.btn-error]="trueFalseAnswer() === false"
+                      [class.btn-outline]="trueFalseAnswer() !== false"
+                      (click)="trueFalseAnswer.set(false)">
+                      <span class="text-4xl">✗</span>
+                      <span class="ml-2">FALSE</span>
+                    </button>
+                  </div>
+
+                  @if (trueFalseAnswer() !== null) {
+                    <div class="form-control space-y-2">
+                      <label class="label">
+                        <span class="label-text font-semibold">How confident are you?</span>
+                        <span class="label-text-alt font-bold text-lg">{{ confidenceLevel() }}%</span>
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        [(ngModel)]="confidenceLevel"
+                        class="range range-secondary"
+                        step="10" />
+                      <div class="flex justify-between text-xs text-base-content/60">
+                        <span>Not sure</span>
+                        <span>Absolutely certain</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- MULTI-SELECT -->
+              @if (currentQuestion()!.type === 'multi-select') {
+                @let multiQ = currentQuestion()!;
+                <div class="space-y-3">
+                  <div class="alert alert-info">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-sm">Select <strong>all</strong> correct answers</span>
+                  </div>
+                  @for (option of multiQ.options; track $index) {
+                    <label class="flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all hover:bg-base-200"
+                           [class.border-primary]="selectedMultiple().has($index)"
+                           [class.bg-primary/10]="selectedMultiple().has($index)">
+                      <input
+                        type="checkbox"
+                        [checked]="selectedMultiple().has($index)"
+                        (change)="toggleMultiSelect($index)"
+                        class="checkbox checkbox-primary mt-1" />
+                      <span class="flex-1">{{ option }}</span>
+                    </label>
+                  }
+                </div>
+              }
 
               <button
                 class="btn btn-primary btn-lg w-full mt-6"
                 (click)="submitAnswer()"
-                [disabled]="selectedAnswer() === null">
+                [disabled]="!canSubmit()">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
@@ -203,10 +345,10 @@
           <div class="text-sm">
             <strong>How the AI adapts:</strong>
             <ul class="list-disc list-inside mt-2 space-y-1">
-              <li>80%+ accuracy → Questions get HARDER 🔴</li>
-              <li>50-80% accuracy → Medium difficulty maintained 🟡</li>
-              <li>Below 50% → Questions get EASIER 🟢</li>
-              <li>Every question is generated fresh based on your performance!</li>
+              <li><strong>Difficulty:</strong> 80%+ → HARDER 🔴 | 50-80% → MEDIUM 🟡 | <50% → EASIER 🟢</li>
+              <li><strong>Question Types:</strong> AI chooses the BEST format for each concept</li>
+              <li>🎯 Multiple Choice • ⌨️ Type Answer • 🎚️ Slider • 💻 Code • 🤔 True/False • ☑️ Multi-Select</li>
+              <li><strong>Dynamic UI:</strong> The interface changes based on question type!</li>
             </ul>
           </div>
         </div>
