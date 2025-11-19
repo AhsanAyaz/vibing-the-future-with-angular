@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WebLLMService } from '../../services/webllm.service';
 
-type QuestionType = 'multiple-choice' | 'text-input' | 'slider' | 'code-completion' | 'true-false-confidence' | 'multi-select';
+type QuestionType = 'multiple-choice' | 'text-input' | 'slider' | 'true-false-confidence' | 'multi-select';
 
 interface BaseQuestion {
   id: string;
@@ -35,13 +35,6 @@ interface SliderQuestion extends BaseQuestion {
   unit?: string;
 }
 
-interface CodeCompletionQuestion extends BaseQuestion {
-  type: 'code-completion';
-  code: string;
-  correctAnswer: string;
-  acceptableAnswers?: string[];
-}
-
 interface TrueFalseConfidenceQuestion extends BaseQuestion {
   type: 'true-false-confidence';
   correctAnswer: boolean;
@@ -54,7 +47,7 @@ interface MultiSelectQuestion extends BaseQuestion {
 }
 
 type QuizQuestion = MultipleChoiceQuestion | TextInputQuestion | SliderQuestion |
-                    CodeCompletionQuestion | TrueFalseConfidenceQuestion | MultiSelectQuestion;
+                    TrueFalseConfidenceQuestion | MultiSelectQuestion;
 
 interface QuizResult {
   questionId: string;
@@ -96,7 +89,6 @@ export class AdaptiveQuizComponent {
   selectedAnswer = signal<number | null>(null); // for multiple-choice
   textAnswer = signal<string>(''); // for text-input
   sliderValue = signal<number>(0); // for slider
-  codeAnswer = signal<string>(''); // for code-completion
   trueFalseAnswer = signal<boolean | null>(null); // for true-false-confidence
   confidenceLevel = signal<number>(50); // for true-false-confidence (0-100)
   selectedMultiple = signal<Set<number>>(new Set()); // for multi-select
@@ -136,6 +128,7 @@ export class AdaptiveQuizComponent {
 
   async generateQuestion() {
     this.isGenerating.set(true);
+    this.currentQuestion.set(null); // Clear current question to prevent flickering
     this.resetAnswers();
 
     try {
@@ -154,9 +147,8 @@ Available question types:
 1. "multiple-choice" - Traditional 4 options (best for concepts, comparisons)
 2. "text-input" - Type exact answer (best for syntax, commands, API names)
 3. "slider" - Estimate a number (best for percentages, performance metrics, sizes)
-4. "code-completion" - Fill in the blank in code (best for syntax patterns)
-5. "true-false-confidence" - True/false with confidence slider (best for facts, misconceptions)
-6. "multi-select" - Select all correct answers (best when multiple things apply)
+4. "true-false-confidence" - True/false with confidence slider (best for facts, misconceptions)
+5. "multi-select" - Select all correct answers (best when multiple things apply)
 
 Requirements:
 - Choose the question type that BEST tests this knowledge
@@ -195,16 +187,6 @@ SLIDER:
   "tolerance": 5,
   "unit": "%",
   "explanation": "About 90% of web apps fail Core Web Vitals"
-}
-
-CODE-COMPLETION:
-{
-  "type": "code-completion",
-  "question": "Complete this Angular signal declaration:",
-  "code": "readonly count = _____(0);",
-  "correctAnswer": "signal",
-  "acceptableAnswers": ["signal"],
-  "explanation": "Use signal() to create a writable signal"
 }
 
 TRUE-FALSE-CONFIDENCE:
@@ -252,7 +234,6 @@ MULTI-SELECT:
     this.selectedAnswer.set(null);
     this.textAnswer.set('');
     this.sliderValue.set(0);
-    this.codeAnswer.set('');
     this.trueFalseAnswer.set(null);
     this.confidenceLevel.set(50);
     this.selectedMultiple.set(new Set());
@@ -287,15 +268,6 @@ MULTI-SELECT:
           tolerance: parsed.tolerance,
           unit: parsed.unit || ''
         } as SliderQuestion;
-
-      case 'code-completion':
-        return {
-          ...baseQuestion,
-          type: 'code-completion',
-          code: parsed.code,
-          correctAnswer: parsed.correctAnswer,
-          acceptableAnswers: parsed.acceptableAnswers || [parsed.correctAnswer]
-        } as CodeCompletionQuestion;
 
       case 'true-false-confidence':
         return {
@@ -387,18 +359,6 @@ MULTI-SELECT:
         return { userAnswer: answer, isCorrect };
       }
 
-      case 'code-completion': {
-        const answer = this.codeAnswer().trim();
-        if (!answer) return { userAnswer: null, isCorrect: false };
-
-        const acceptableAnswers = question.acceptableAnswers || [question.correctAnswer];
-        const isCorrect = acceptableAnswers.some(acceptable =>
-          answer.toLowerCase() === acceptable.toLowerCase()
-        );
-
-        return { userAnswer: answer, isCorrect };
-      }
-
       case 'true-false-confidence': {
         const answer = this.trueFalseAnswer();
         if (answer === null) return { userAnswer: null, isCorrect: false };
@@ -451,8 +411,6 @@ MULTI-SELECT:
         return this.textAnswer().trim().length > 0;
       case 'slider':
         return true; // Always can submit slider
-      case 'code-completion':
-        return this.codeAnswer().trim().length > 0;
       case 'true-false-confidence':
         return this.trueFalseAnswer() !== null;
       case 'multi-select':
@@ -467,7 +425,6 @@ MULTI-SELECT:
       case 'multiple-choice': return '🎯';
       case 'text-input': return '⌨️';
       case 'slider': return '🎚️';
-      case 'code-completion': return '💻';
       case 'true-false-confidence': return '🤔';
       case 'multi-select': return '☑️';
       default: return '❓';
@@ -479,7 +436,6 @@ MULTI-SELECT:
       case 'multiple-choice': return 'Multiple Choice';
       case 'text-input': return 'Type Answer';
       case 'slider': return 'Estimate Value';
-      case 'code-completion': return 'Complete Code';
       case 'true-false-confidence': return 'True/False';
       case 'multi-select': return 'Select All';
       default: return 'Unknown';
