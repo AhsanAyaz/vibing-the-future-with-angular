@@ -27,7 +27,7 @@ interface Message {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule],
-  templateUrl: './gemini-chat.component.html'
+  templateUrl: './gemini-chat.component.html',
 })
 export class GeminiChatComponent {
   // Services
@@ -78,7 +78,7 @@ export class GeminiChatComponent {
 
     try {
       this.genAI = new GoogleGenerativeAI(key);
-      this.model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+      this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
       this.isConfigured.set(true);
       this.error.set(null);
 
@@ -121,10 +121,10 @@ export class GeminiChatComponent {
       id: crypto.randomUUID(),
       role: 'user',
       content: this.currentMessage,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    this.messages.update(msgs => [...msgs, userMessage]);
+    this.messages.update((msgs) => [...msgs, userMessage]);
     const messageText = this.currentMessage;
     this.currentMessage = '';
 
@@ -133,9 +133,9 @@ export class GeminiChatComponent {
       id: crypto.randomUUID(),
       role: 'assistant',
       content: '',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    this.messages.update(msgs => [...msgs, aiMessage]);
+    this.messages.update((msgs) => [...msgs, aiMessage]);
 
     this.isStreaming.set(true);
     this.streamingContent.set('');
@@ -146,23 +146,23 @@ export class GeminiChatComponent {
 
       for await (const chunk of result.stream) {
         const text = chunk.text();
-        this.streamingContent.update(current => current + text);
+        this.streamingContent.update((current) => current + text);
 
         // Update the message in the array
-        this.messages.update(msgs =>
-          msgs.map(msg =>
-            msg.id === aiMessage.id
-              ? { ...msg, content: this.streamingContent() }
-              : msg
+        this.messages.update((msgs) =>
+          msgs.map((msg) =>
+            msg.id === aiMessage.id ? { ...msg, content: this.streamingContent() } : msg
           )
         );
       }
     } catch (err) {
       console.error('Streaming error:', err);
-      this.error.set('Failed to get response from Gemini. Check your API key and internet connection.');
+      this.error.set(
+        'Failed to get response from Gemini. Check your API key and internet connection.'
+      );
 
       // Remove the failed message
-      this.messages.update(msgs => msgs.filter(msg => msg.id !== aiMessage.id));
+      this.messages.update((msgs) => msgs.filter((msg) => msg.id !== aiMessage.id));
     } finally {
       this.isStreaming.set(false);
       this.streamingContent.set('');
@@ -178,7 +178,7 @@ export class GeminiChatComponent {
   formatTime(date: Date): string {
     return date.toLocaleTimeString('en-US', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 }

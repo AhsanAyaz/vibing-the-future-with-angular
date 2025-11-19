@@ -9,7 +9,7 @@ import { marked } from 'marked';
  * with proper formatting (bold, italic, lists, code blocks, etc.)
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MarkdownService {
   private sanitizer = inject(DomSanitizer);
@@ -19,8 +19,6 @@ export class MarkdownService {
     marked.setOptions({
       breaks: true, // Convert \n to <br>
       gfm: true, // GitHub Flavored Markdown
-      headerIds: false, // Disable header IDs for security
-      mangle: false, // Don't mangle email addresses
     });
   }
 
