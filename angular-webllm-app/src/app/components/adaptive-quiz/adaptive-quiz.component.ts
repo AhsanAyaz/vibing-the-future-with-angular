@@ -55,6 +55,8 @@ interface QuizResult {
   userAnswer: any; // Can be number, string, number[], boolean, or {answer: boolean, confidence: number}
   timeTaken: number;
   questionType: QuestionType;
+  question: QuizQuestion; // Store the full question for reference
+  incorrectReason?: string; // Why the answer was incorrect
 }
 
 /**
@@ -84,6 +86,8 @@ export class AdaptiveQuizComponent {
   readonly isGenerating = signal(false);
   readonly isStarted = signal(false);
   readonly quizTopic = signal('');
+  readonly showLastResult = signal(false); // Control feedback visibility
+  private usedQuestions = new Set<string>(); // Track question hashes to avoid duplicates
 
   // User interaction - different types for different questions
   selectedAnswer = signal<number | null>(null); // for multiple-choice
@@ -123,25 +127,36 @@ export class AdaptiveQuizComponent {
     this.quizTopic.set(topic);
     this.isStarted.set(true);
     this.results.set([]);
+    this.usedQuestions.clear(); // Clear used questions for new quiz
+    this.showLastResult.set(false);
     await this.generateQuestion();
   }
 
   async generateQuestion() {
     this.isGenerating.set(true);
     this.currentQuestion.set(null); // Clear current question to prevent flickering
+    this.showLastResult.set(false); // Hide previous result feedback
     this.resetAnswers();
 
-    try {
-      const difficulty = this.currentDifficulty();
-      const resultsContext = this.getResultsContext();
-      const usedTypes = this.getRecentQuestionTypes();
+    const maxRetries = 3;
+    let attempt = 0;
 
-      const prompt = `You are an intelligent programming quiz generator. Generate a ${difficulty} difficulty question about: ${this.quizTopic()}
+    while (attempt < maxRetries) {
+      try {
+        const difficulty = this.currentDifficulty();
+        const resultsContext = this.getResultsContext();
+        const usedTypes = this.getRecentQuestionTypes();
+
+        const prompt = `You are an intelligent programming quiz generator. Generate a ${difficulty} difficulty question about: ${this.quizTopic()}
 
 ${resultsContext}
 
-IMPORTANT: Choose the BEST question type for the content. Vary question types to keep it interesting.
+IMPORTANT:
+- Generate a UNIQUE question that hasn't been asked before
+- Choose the BEST question type for the content
+- Vary question types to keep it interesting
 Recent types used: ${usedTypes.join(', ') || 'none yet'}
+Questions asked so far: ${this.results().length}
 
 Available question types:
 1. "multiple-choice" - Traditional 4 options (best for concepts, comparisons)
@@ -206,28 +221,56 @@ MULTI-SELECT:
   "explanation": "ngOnInit, ngAfterViewInit, and ngOnDestroy are valid hooks"
 }`;
 
-      let response = '';
-      for await (const chunk of this.webllm.generateStream(prompt)) {
-        response += chunk;
+        let response = '';
+        for await (const chunk of this.webllm.generateStream(prompt)) {
+          response += chunk;
+        }
+
+        // Try to parse the JSON
+        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          throw new Error('Failed to parse AI response');
+        }
+
+        const parsed = JSON.parse(jsonMatch[0]);
+        const question = this.createQuestionFromParsed(parsed, difficulty);
+
+        // Create a hash of the question to check for duplicates
+        const questionHash = this.hashQuestion(question);
+
+        if (this.usedQuestions.has(questionHash)) {
+          // Duplicate question - retry
+          attempt++;
+          console.log(`Duplicate question detected, retrying... (${attempt}/${maxRetries})`);
+          continue;
+        }
+
+        // Unique question - use it
+        this.usedQuestions.add(questionHash);
+        this.currentQuestion.set(question);
+        this.questionStartTime = Date.now();
+        this.isGenerating.set(false);
+        return; // Success!
+
+      } catch (error) {
+        console.error('Error generating question:', error);
+        attempt++;
+        if (attempt >= maxRetries) {
+          alert('Failed to generate question. Please try again.');
+          this.isGenerating.set(false);
+          return;
+        }
       }
-
-      // Try to parse the JSON
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('Failed to parse AI response');
-      }
-
-      const parsed = JSON.parse(jsonMatch[0]);
-      const question = this.createQuestionFromParsed(parsed, difficulty);
-
-      this.currentQuestion.set(question);
-      this.questionStartTime = Date.now();
-    } catch (error) {
-      console.error('Error generating question:', error);
-      alert('Failed to generate question. Please try again.');
-    } finally {
-      this.isGenerating.set(false);
     }
+
+    // If we get here, all retries failed
+    this.isGenerating.set(false);
+  }
+
+  private hashQuestion(question: QuizQuestion): string {
+    // Create a simple hash based on question text and type
+    // This helps detect duplicates even if options are slightly different
+    return `${question.type}:${question.question.toLowerCase().trim()}`;
   }
 
   private resetAnswers() {
@@ -310,21 +353,62 @@ MULTI-SELECT:
 
     const timeTaken = Math.round((Date.now() - this.questionStartTime) / 1000);
 
+    // Generate explanation for incorrect answers
+    const incorrectReason = !isCorrect ? this.getIncorrectReason(question, userAnswer) : undefined;
+
     const result: QuizResult = {
       questionId: question.id,
       correct: isCorrect,
       userAnswer,
       timeTaken,
-      questionType: question.type
+      questionType: question.type,
+      question, // Store full question for reference
+      incorrectReason
     };
 
     this.results.update(results => [...results, result]);
+    this.showLastResult.set(true); // Show feedback
 
     // Show brief feedback before next question
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 2500));
 
-    // Generate next question
+    // Generate next question (this will hide the feedback)
     await this.generateQuestion();
+  }
+
+  private getIncorrectReason(question: QuizQuestion, userAnswer: any): string {
+    switch (question.type) {
+      case 'multiple-choice': {
+        const correctOption = question.options[question.correctAnswer];
+        const userOption = question.options[userAnswer];
+        return `You selected "${userOption}". The correct answer is "${correctOption}".`;
+      }
+
+      case 'text-input': {
+        const correctAnswer = question.correctAnswer;
+        return `You entered "${userAnswer}". The correct answer is "${correctAnswer}".`;
+      }
+
+      case 'slider': {
+        const diff = Math.abs(userAnswer - question.correctAnswer);
+        return `You estimated ${userAnswer}${question.unit || ''}. The correct answer is ${question.correctAnswer}${question.unit || ''} (you were off by ${diff}${question.unit || ''}).`;
+      }
+
+      case 'true-false-confidence': {
+        const correctAnswer = question.correctAnswer ? 'True' : 'False';
+        const userAnswerText = userAnswer.answer ? 'True' : 'False';
+        return `You selected ${userAnswerText} with ${userAnswer.confidence}% confidence. The correct answer is ${correctAnswer}.`;
+      }
+
+      case 'multi-select': {
+        const correctOptions = question.correctAnswers.map(idx => question.options[idx]);
+        const userOptions = userAnswer.map((idx: number) => question.options[idx]);
+        return `You selected: ${userOptions.join(', ')}. The correct answers are: ${correctOptions.join(', ')}.`;
+      }
+
+      default:
+        return 'Incorrect answer.';
+    }
   }
 
   private validateAnswer(question: QuizQuestion): { userAnswer: any; isCorrect: boolean } {
