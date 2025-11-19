@@ -1,0 +1,192 @@
+<div class="min-h-screen bg-gradient-to-br from-lovable-darker via-base-100 to-lovable-dark">
+  <!-- Header -->
+  <header class="sticky top-0 z-50 glass-effect border-b border-primary/20">
+    <div class="container mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="text-3xl">🧠</div>
+          <div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+              {{ title }}
+            </h1>
+            <p class="text-sm text-base-content/70">Gemini & Web-LLM • Cloud + On-Device AI</p>
+          </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="flex gap-2">
+          <!-- Gemini Chat - Always available (uses its own API key) -->
+          <a routerLink="/gemini-chat" routerLinkActive="btn-primary" class="btn btn-sm btn-ghost">
+            💬 Gemini Chat
+          </a>
+
+          <!-- Web-LLM demos - Only when model is ready -->
+          @if (webllm.isReady()) {
+            <a routerLink="/document-analyzer" routerLinkActive="btn-primary" class="btn btn-sm btn-ghost">
+              📚 Documents
+            </a>
+            <a routerLink="/adaptive-quiz" routerLinkActive="btn-primary" class="btn btn-sm btn-ghost">
+              🎯 Adaptive Quiz
+            </a>
+            <a routerLink="/code-explainer" routerLinkActive="btn-primary" class="btn btn-sm btn-ghost">
+              💻 Code
+            </a>
+            <a routerLink="/email-generator" routerLinkActive="btn-primary" class="btn btn-sm btn-ghost">
+              ✉️ Email
+            </a>
+          }
+        </nav>
+
+        <div class="flex items-center gap-3">
+          @if (webllm.isReady()) {
+            <div class="badge badge-success gap-2">
+              <div class="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+              Model Ready
+            </div>
+          } @else if (webllm.isLoading()) {
+            <div class="badge badge-warning gap-2">
+              <span class="loading loading-spinner loading-xs"></span>
+              Loading Model
+            </div>
+          } @else {
+            <div class="badge badge-ghost gap-2">
+              <div class="w-2 h-2 rounded-full bg-base-content/30"></div>
+              Not Initialized
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-6 py-8">
+    @if (showInitializer()) {
+      <!-- Model Initialization Screen -->
+      <div class="flex items-center justify-center min-h-[70vh]">
+        <div class="card w-full max-w-3xl glass-effect glow-effect">
+          <div class="card-body items-center text-center">
+            <div class="text-6xl mb-6 animate-bounce">🚀</div>
+            <h2 class="card-title text-4xl mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Welcome to AI-Powered Angular
+            </h2>
+            <p class="text-lg text-base-content/80 mb-8 max-w-2xl">
+              Experience both cloud AI (Gemini) and on-device AI (Web-LLM) in one Angular app.
+              Chat, learn, and analyze with privacy-first, intelligent features.
+            </p>
+
+            @if (webllm.isLoading()) {
+              <!-- Loading State -->
+              <div class="w-full space-y-6">
+                <div class="flex flex-col gap-4">
+                  <div class="flex justify-between text-sm">
+                    <span class="font-semibold text-primary">
+                      {{ (webllm.loadProgress().progress * 100).toFixed(1) }}%
+                    </span>
+                    <span class="text-base-content/60">
+                      {{ formatTime(webllm.loadProgress().timeElapsed) }} elapsed
+                    </span>
+                  </div>
+                  <progress
+                    class="progress progress-primary w-full h-3"
+                    [value]="webllm.loadProgress().progress * 100"
+                    max="100">
+                  </progress>
+                </div>
+
+                <p class="text-base-content/80 text-sm">
+                  {{ webllm.loadProgress().text }}
+                </p>
+
+                <div class="alert alert-info">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  <div class="text-sm text-left">
+                    <strong>Note:</strong> First-time setup downloads ~4GB model.
+                    This may take several minutes depending on your connection.
+                    The model is cached for future use.
+                  </div>
+                </div>
+              </div>
+            } @else if (webllm.error()) {
+              <!-- Error State -->
+              <div class="alert alert-error mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>{{ webllm.error() }}</span>
+              </div>
+              <button class="btn btn-primary" (click)="initializeModel()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                </svg>
+                Try Again
+              </button>
+            } @else {
+              <!-- Initial State -->
+              <div class="grid grid-cols-2 gap-6 mb-8 w-full">
+                <div class="card bg-base-200 hover:bg-base-300 transition-smooth">
+                  <div class="card-body items-center text-center">
+                    <div class="text-4xl mb-3">💬</div>
+                    <h3 class="card-title text-lg">Gemini Streaming Chat</h3>
+                    <p class="text-sm text-base-content/70">Cloud-powered AI with real-time responses</p>
+                  </div>
+                </div>
+                <div class="card bg-base-200 hover:bg-base-300 transition-smooth">
+                  <div class="card-body items-center text-center">
+                    <div class="text-4xl mb-3">🎯</div>
+                    <h3 class="card-title text-lg">Adaptive Quiz</h3>
+                    <p class="text-sm text-base-content/70">AI generates questions that match your skill level</p>
+                  </div>
+                </div>
+                <div class="card bg-base-200 hover:bg-base-300 transition-smooth">
+                  <div class="card-body items-center text-center">
+                    <div class="text-4xl mb-3">📄</div>
+                    <h3 class="card-title text-lg">Document Analysis</h3>
+                    <p class="text-sm text-base-content/70">On-device AI for summaries and insights</p>
+                  </div>
+                </div>
+                <div class="card bg-base-200 hover:bg-base-300 transition-smooth">
+                  <div class="card-body items-center text-center">
+                    <div class="text-4xl mb-3">🔒</div>
+                    <h3 class="card-title text-lg">100% Private</h3>
+                    <p class="text-sm text-base-content/70">Web-LLM runs entirely in your browser</p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                class="btn btn-lg btn-primary glow-effect"
+                (click)="initializeModel()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Initialize AI Model
+              </button>
+              <p class="text-sm text-base-content/60 mt-4">
+                This will download ~4GB. Make sure you have a stable connection.
+              </p>
+            }
+          </div>
+        </div>
+      </div>
+    } @else {
+      <!-- Router Outlet for all components -->
+      <router-outlet></router-outlet>
+    }
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer footer-center p-6 bg-base-200/50 backdrop-blur text-base-content border-t border-base-300/50 mt-12">
+    <div>
+      <p class="text-sm">
+        Powered by
+        <a href="https://mlc.ai/web-llm" target="_blank" rel="noopener" class="link link-primary font-semibold">Web-LLM</a>
+        • Built with
+        <span class="text-primary font-semibold">Angular 19</span>
+        • Styled with
+        <span class="text-accent font-semibold">DaisyUI</span>
+      </p>
+      <p class="text-xs text-base-content/50">
+        🇮🇹 Angular Day Italy 2025 • "AI-Assisted Engineering" Demo
+      </p>
+    </div>
+  </footer>
+</div>

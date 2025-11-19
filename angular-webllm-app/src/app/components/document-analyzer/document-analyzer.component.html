@@ -1,0 +1,388 @@
+<div class="flex gap-4 h-[calc(100vh-200px)] relative">
+  <!-- Loading Overlay for File Loading -->
+  @if (docService.isLoadingFile()) {
+    <div class="absolute inset-0 bg-base-100/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
+      <div class="glass-effect p-8 rounded-2xl flex flex-col items-center gap-4">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <p class="text-lg font-semibold">Loading file...</p>
+        <p class="text-sm text-base-content/60">Please wait while we read your document</p>
+      </div>
+    </div>
+  }
+
+  <!-- Loading Overlay for IndexedDB -->
+  @if (docService.isLoadingDocuments()) {
+    <div class="absolute inset-0 bg-base-100/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
+      <div class="glass-effect p-8 rounded-2xl flex flex-col items-center gap-4">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <p class="text-lg font-semibold">Loading documents...</p>
+        <p class="text-sm text-base-content/60">Retrieving your saved documents</p>
+      </div>
+    </div>
+  }
+
+  <!-- Sidebar -->
+  <aside class="w-80 glass-effect rounded-2xl p-4 flex flex-col">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold flex items-center gap-2">
+        📚 <span class="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Documents</span>
+      </h2>
+      <button
+        class="btn btn-circle btn-primary btn-sm glow-effect"
+        (click)="isAddingDocument.set(true)"
+        title="Add Document">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto space-y-2">
+      @if (docService.documents().length === 0) {
+        <div class="text-center py-12">
+          <div class="text-5xl mb-4 opacity-50">📄</div>
+          <p class="text-base-content/60 text-sm mb-4">No documents yet</p>
+          <button class="btn btn-sm btn-primary" (click)="isAddingDocument.set(true)">
+            Add your first document
+          </button>
+        </div>
+      } @else {
+        @for (doc of docService.documents(); track doc.id) {
+          <div
+            class="card bg-base-200 hover:bg-base-300 cursor-pointer transition-smooth"
+            [class.ring-2]="docService.currentDocument()?.id === doc.id"
+            [class.ring-primary]="docService.currentDocument()?.id === doc.id"
+            [class.glow-effect]="docService.currentDocument()?.id === doc.id"
+            (click)="selectDocument(doc.id)">
+            <div class="card-body p-4">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-sm truncate">{{ doc.title }}</h3>
+                  <p class="text-xs text-base-content/60 flex items-center gap-2 mt-1">
+                    <span>{{ doc.createdAt | date: 'short' }}</span>
+                    @if (doc.analysis) {
+                      <span class="badge badge-success badge-xs">Analyzed</span>
+                    }
+                  </p>
+                </div>
+                <button
+                  class="btn btn-ghost btn-xs btn-circle"
+                  (click)="deleteDocument(doc.id, $event)"
+                  title="Delete">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 glass-effect rounded-2xl flex flex-col overflow-hidden">
+    @if (isAddingDocument()) {
+      <!-- Add Document Form -->
+      <div class="p-6 overflow-y-auto">
+        <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+          📝 <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Add New Document</span>
+        </h2>
+
+        <div class="space-y-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-semibold">Document Title</span>
+            </label>
+            <input
+              type="text"
+              [(ngModel)]="documentTitle"
+              placeholder="Enter document title..."
+              class="input input-bordered input-primary w-full" />
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-semibold">Document Content</span>
+              <span class="label-text-alt">Words: {{ getWordCount(documentContent) }}</span>
+            </label>
+            <textarea
+              [(ngModel)]="documentContent"
+              placeholder="Paste or type your document content here..."
+              rows="15"
+              class="textarea textarea-bordered textarea-primary w-full font-mono text-sm"></textarea>
+          </div>
+
+          <div class="divider">OR</div>
+
+          <div class="form-control">
+            <label class="btn btn-outline btn-secondary w-full">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+              Upload a text file
+              <input
+                type="file"
+                accept=".txt,.md,.json,.csv"
+                (change)="onFileSelected($event)"
+                class="hidden" />
+            </label>
+          </div>
+
+          <div class="flex gap-3 justify-end pt-4">
+            <button class="btn btn-ghost" (click)="cancelAdd()">Cancel</button>
+            <button
+              class="btn btn-primary"
+              (click)="addDocument()"
+              [disabled]="!documentContent.trim()">
+              Add Document
+            </button>
+          </div>
+        </div>
+      </div>
+    } @else if (docService.currentDocument()) {
+      <!-- Tabs -->
+      <div role="tablist" class="tabs tabs-bordered px-6 pt-6">
+        <a
+          role="tab"
+          class="tab gap-2"
+          [class.tab-active]="activeTab() === 'documents'"
+          (click)="activeTab.set('documents')">
+          📄 Content
+        </a>
+        <a
+          role="tab"
+          class="tab gap-2"
+          [class.tab-active]="activeTab() === 'analysis'"
+          (click)="activeTab.set('analysis')">
+          📊 Analysis
+        </a>
+        <a
+          role="tab"
+          class="tab gap-2"
+          [class.tab-active]="activeTab() === 'qa'"
+          (click)="activeTab.set('qa')">
+          💬 Q&A
+        </a>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <!-- Content Tab -->
+        @if (activeTab() === 'documents') {
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h2 class="text-2xl font-bold">{{ docService.currentDocument()!.title }}</h2>
+              <button
+                class="btn btn-outline btn-secondary btn-sm"
+                (click)="exportDocument(docService.currentDocument()!)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+                Export
+              </button>
+            </div>
+            <div class="card bg-base-200">
+              <div class="card-body">
+                <pre class="whitespace-pre-wrap text-sm font-mono">{{ docService.currentDocument()!.content }}</pre>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Analysis Tab -->
+        @if (activeTab() === 'analysis') {
+          <div class="space-y-6">
+            <div class="flex items-center justify-between">
+              <h2 class="text-2xl font-bold">📊 Document Analysis</h2>
+              <div class="flex gap-2">
+                @if (docService.isAnalyzing()) {
+                  <button
+                    class="btn btn-error"
+                    (click)="stopAnalysis()">
+                    🛑 Stop Analysis
+                  </button>
+                } @else {
+                  <button
+                    class="btn btn-primary"
+                    (click)="analyzeCurrentDocument()">
+                    🔍 Analyze
+                  </button>
+                }
+              </div>
+            </div>
+
+            @if (docService.isAnalyzing()) {
+              <div class="flex flex-col items-center justify-center py-16">
+                <span class="loading loading-ring loading-lg text-primary mb-4"></span>
+                <p class="text-base-content/70">Analyzing document with AI...</p>
+              </div>
+            }
+
+            @if (docService.currentDocument()!.analysis) {
+              <div class="space-y-6">
+                <!-- Summary -->
+                <div class="card bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20">
+                  <div class="card-body">
+                    <h3 class="card-title text-lg">📝 Summary</h3>
+                    <p class="leading-relaxed">{{ docService.currentDocument()!.analysis!.summary }}</p>
+                  </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-4">
+                  <div class="stats shadow bg-base-200">
+                    <div class="stat">
+                      <div class="stat-figure text-primary text-3xl">📖</div>
+                      <div class="stat-title">Words</div>
+                      <div class="stat-value text-primary">{{ docService.currentDocument()!.analysis!.wordCount }}</div>
+                    </div>
+                  </div>
+                  <div class="stats shadow bg-base-200">
+                    <div class="stat">
+                      <div class="stat-figure text-secondary text-3xl">⏱️</div>
+                      <div class="stat-title">Reading Time</div>
+                      <div class="stat-value text-secondary">{{ docService.currentDocument()!.analysis!.readingTime }} min</div>
+                    </div>
+                  </div>
+                  <div class="stats shadow bg-base-200">
+                    <div class="stat">
+                      <div class="stat-figure text-3xl">{{ getSentimentEmoji(docService.currentDocument()!.analysis!.sentiment) }}</div>
+                      <div class="stat-title">Sentiment</div>
+                      <div class="stat-value text-accent capitalize">{{ docService.currentDocument()!.analysis!.sentiment }}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Key Points -->
+                <div class="card bg-base-200">
+                  <div class="card-body">
+                    <h3 class="card-title">🎯 Key Points</h3>
+                    <ul class="space-y-2">
+                      @for (point of docService.currentDocument()!.analysis!.keyPoints; track $index) {
+                        <li class="flex items-start gap-3">
+                          <div class="badge badge-primary badge-sm mt-1">{{ $index + 1 }}</div>
+                          <span class="flex-1">{{ point }}</span>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Topics -->
+                <div class="card bg-base-200">
+                  <div class="card-body">
+                    <h3 class="card-title">🏷️ Topics</h3>
+                    <div class="flex flex-wrap gap-2">
+                      @for (topic of docService.currentDocument()!.analysis!.topics; track $index) {
+                        <div class="badge badge-lg badge-outline badge-primary">{{ topic }}</div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+            } @else if (!docService.isAnalyzing()) {
+              <div class="flex flex-col items-center justify-center py-16 text-center">
+                <div class="text-6xl mb-4 opacity-50">📊</div>
+                <p class="text-base-content/70 mb-4">No analysis yet</p>
+                <p class="text-sm text-base-content/50">Click "Analyze" to get AI-powered insights</p>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Q&A Tab -->
+        @if (activeTab() === 'qa') {
+          <div class="flex flex-col h-full">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-2xl font-bold">💬 Ask Questions</h2>
+              @if (docService.qaHistory().length > 0) {
+                <button class="btn btn-ghost btn-sm" (click)="clearQAHistory()">
+                  Clear History
+                </button>
+              }
+            </div>
+
+            <!-- Messages -->
+            <div class="flex-1 overflow-y-auto space-y-4 mb-4">
+              @if (docService.qaHistory().length === 0 && !isAnswering()) {
+                <div class="flex flex-col items-center justify-center h-full text-center">
+                  <div class="text-6xl mb-4 opacity-50">💬</div>
+                  <p class="text-base-content/70 mb-2">Ask questions about this document</p>
+                  <p class="text-sm text-base-content/50">💡 Try: "What is the main topic?" or "Summarize the key arguments"</p>
+                </div>
+              }
+
+              @for (qa of docService.qaHistory(); track qa.id) {
+                <!-- Question -->
+                <div class="chat chat-end">
+                  <div class="chat-header flex items-center gap-2">
+                    <time class="text-xs opacity-50">{{ formatTime(qa.timestamp) }}</time>
+                    You
+                  </div>
+                  <div class="chat-bubble chat-bubble-primary">{{ qa.question }}</div>
+                </div>
+
+                <!-- Answer -->
+                <div class="chat chat-start">
+                  <div class="chat-header flex items-center gap-2">
+                    AI Assistant
+                    <time class="text-xs opacity-50">{{ formatTime(qa.timestamp) }}</time>
+                  </div>
+                  <div class="chat-bubble chat-bubble-secondary">{{ qa.answer }}</div>
+                </div>
+              }
+
+              @if (isAnswering()) {
+                <div class="chat chat-start">
+                  <div class="chat-header flex items-center gap-2">
+                    AI Assistant
+                    <span class="loading loading-dots loading-xs"></span>
+                  </div>
+                  <div class="chat-bubble chat-bubble-secondary">
+                    {{ streamingAnswer() }}<span class="animate-pulse">|</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Input -->
+            <div class="flex gap-2">
+              <input
+                type="text"
+                [(ngModel)]="currentQuestion"
+                (keyup.enter)="askQuestion()"
+                [disabled]="isAnswering()"
+                placeholder="Ask a question about this document..."
+                class="input input-bordered input-primary flex-1" />
+              <button
+                class="btn btn-primary btn-square"
+                (click)="askQuestion()"
+                [disabled]="!currentQuestion.trim() || isAnswering()">
+                @if (isAnswering()) {
+                  <span class="loading loading-spinner loading-sm"></span>
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                  </svg>
+                }
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- No Document Selected -->
+      <div class="flex flex-col items-center justify-center h-full text-center">
+        <div class="text-7xl mb-6 opacity-50">📄</div>
+        <h2 class="text-2xl font-bold mb-4">No Document Selected</h2>
+        <p class="text-base-content/70 mb-6">Add a document to get started with AI-powered analysis</p>
+        <button class="btn btn-primary btn-lg" (click)="isAddingDocument.set(true)">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          Add Document
+        </button>
+      </div>
+    }
+  </div>
+</div>

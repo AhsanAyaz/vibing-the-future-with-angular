@@ -1,0 +1,46 @@
+@import 'tailwindcss';
+@plugin "daisyui";
+
+/* Custom Global Styles */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: hsl(var(--b2));
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--b3));
+  border-radius: 0.25rem;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--n));
+}
+
+/* Custom utility classes */
+.transition-smooth {
+  transition: all 0.3s ease-in-out;
+}
+
+.glass-effect {
+  background-color: hsla(var(--b2) / 0.5);
+  backdrop-filter: blur(12px);
+  border: 1px solid hsla(var(--b3) / 0.5);
+}
+
+.glow-effect {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+.glow-effect-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
