@@ -49,13 +49,13 @@ jobs:
         run: cd angular-webllm-app && npm ci
 
       - name: Build Angular app
-        run: cd angular-webllm-app && npm run build
+        run: cd angular-webllm-app && npm run build -- --base-href /vibing-the-future-with-angular/app/
 
       # Prepare deployment directory with both slides and app
       - name: Prepare deployment directory
         run: |
           mkdir -p deploy
-          cp -r dist/reveal-multi-slides-template/* deploy/
+          cp -r dist/vibing-the-future-with-angular/* deploy/
           mkdir -p deploy/app
           cp -r angular-webllm-app/dist/angular-webllm-app/browser/* deploy/app/
 
