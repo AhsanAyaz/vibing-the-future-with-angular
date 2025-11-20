@@ -87,6 +87,8 @@ export class AdaptiveQuizComponent {
   readonly isStarted = signal(false);
   readonly quizTopic = signal('');
   readonly showLastResult = signal(false); // Control feedback visibility
+  readonly showHistory = signal(false); // Control history modal visibility
+  readonly isEvaluating = signal(false); // LLM is evaluating answer
   private usedQuestions = new Set<string>(); // Track question hashes to avoid duplicates
 
   // User interaction - different types for different questions
@@ -268,9 +270,22 @@ MULTI-SELECT:
   }
 
   private hashQuestion(question: QuizQuestion): string {
-    // Create a simple hash based on question text and type
-    // This helps detect duplicates even if options are slightly different
-    return `${question.type}:${question.question.toLowerCase().trim()}`;
+    // Create a robust hash to detect duplicates
+    // Include question text, type, and key identifying features
+    let hash = `${question.type}:${question.question.toLowerCase().trim()}`;
+
+    // Add additional context based on question type to make hash more unique
+    if (question.type === 'multiple-choice') {
+      hash += `:${question.options.map(o => o.toLowerCase()).sort().join('|')}`;
+    } else if (question.type === 'text-input') {
+      hash += `:${question.correctAnswer.toLowerCase()}`;
+    } else if (question.type === 'slider') {
+      hash += `:${question.min}-${question.max}-${question.correctAnswer}`;
+    } else if (question.type === 'multi-select') {
+      hash += `:${question.options.map(o => o.toLowerCase()).sort().join('|')}`;
+    }
+
+    return hash;
   }
 
   private resetAnswers() {
@@ -348,8 +363,22 @@ MULTI-SELECT:
     const question = this.currentQuestion();
     if (!question) return;
 
-    const { userAnswer, isCorrect } = this.validateAnswer(question);
-    if (userAnswer === null) return; // No answer provided
+    this.isEvaluating.set(true);
+
+    // For multiple-choice, use simple validation
+    // For others, use LLM evaluation for smarter checking
+    let validationResult;
+    if (question.type === 'multiple-choice') {
+      validationResult = this.validateAnswer(question);
+    } else {
+      validationResult = await this.validateAnswerWithLLM(question);
+    }
+
+    const { userAnswer, isCorrect } = validationResult;
+    if (userAnswer === null) {
+      this.isEvaluating.set(false);
+      return; // No answer provided
+    }
 
     const timeTaken = Math.round((Date.now() - this.questionStartTime) / 1000);
 
@@ -368,11 +397,12 @@ MULTI-SELECT:
 
     this.results.update(results => [...results, result]);
     this.showLastResult.set(true); // Show feedback
+    this.isEvaluating.set(false);
 
-    // Show brief feedback before next question
-    await new Promise(resolve => setTimeout(resolve, 2500));
+    // Don't auto-advance - wait for user to click "Next Question"
+  }
 
-    // Generate next question (this will hide the feedback)
+  async nextQuestion() {
     await this.generateQuestion();
   }
 
@@ -408,6 +438,77 @@ MULTI-SELECT:
 
       default:
         return 'Incorrect answer.';
+    }
+  }
+
+  private async validateAnswerWithLLM(question: QuizQuestion): Promise<{ userAnswer: any; isCorrect: boolean }> {
+    // Get user answer based on question type
+    let userAnswer: any;
+    let userAnswerText: string;
+
+    switch (question.type) {
+      case 'text-input':
+        userAnswer = this.textAnswer().trim();
+        if (!userAnswer) return { userAnswer: null, isCorrect: false };
+        userAnswerText = userAnswer;
+        break;
+
+      case 'slider':
+        userAnswer = this.sliderValue();
+        userAnswerText = `${userAnswer}${question.unit || ''}`;
+        break;
+
+      case 'true-false-confidence':
+        const tfAnswer = this.trueFalseAnswer();
+        if (tfAnswer === null) return { userAnswer: null, isCorrect: false };
+        userAnswer = { answer: tfAnswer, confidence: this.confidenceLevel() };
+        userAnswerText = `${tfAnswer ? 'True' : 'False'} (${this.confidenceLevel()}% confident)`;
+        break;
+
+      case 'multi-select':
+        const selected = Array.from(this.selectedMultiple());
+        if (selected.length === 0) return { userAnswer: null, isCorrect: false };
+        userAnswer = selected;
+        userAnswerText = selected.map(idx => question.options[idx]).join(', ');
+        break;
+
+      default:
+        return { userAnswer: null, isCorrect: false };
+    }
+
+    // Ask LLM to evaluate the answer
+    const prompt = `You are evaluating a quiz answer. Be fair and reasonable in your evaluation.
+
+Question Type: ${question.type}
+Question: ${question.question}
+${question.type === 'text-input' ? `Expected Answer: ${question.correctAnswer}` : ''}
+${question.type === 'text-input' && question.acceptableAnswers ? `Also Accept: ${question.acceptableAnswers.join(', ')}` : ''}
+${question.type === 'slider' ? `Correct Answer: ${question.correctAnswer}${question.unit || ''} (tolerance: ±${question.tolerance})` : ''}
+${question.type === 'true-false-confidence' ? `Correct Answer: ${question.correctAnswer ? 'True' : 'False'}` : ''}
+${question.type === 'multi-select' ? `Correct Options: ${question.correctAnswers.map(idx => question.options[idx]).join(', ')}` : ''}
+
+User's Answer: ${userAnswerText}
+
+Instructions:
+- For text-input: Accept reasonable variations (typos, spacing, abbreviations) if meaning is correct
+- For slider: Check if within tolerance range
+- For true-false: Check if answer is correct (confidence doesn't affect correctness)
+- For multi-select: Check if all correct options selected and no incorrect ones
+
+Respond with ONLY "CORRECT" or "INCORRECT" (one word only).`;
+
+    try {
+      let response = '';
+      for await (const chunk of this.webllm.generateStream(prompt)) {
+        response += chunk;
+      }
+
+      const isCorrect = response.trim().toUpperCase().includes('CORRECT') && !response.trim().toUpperCase().includes('INCORRECT');
+      return { userAnswer, isCorrect };
+    } catch (error) {
+      console.error('Error evaluating answer with LLM:', error);
+      // Fallback to simple validation
+      return this.validateAnswer(question);
     }
   }
 
@@ -531,6 +632,51 @@ MULTI-SELECT:
     this.results.set([]);
     this.currentQuestion.set(null);
     this.quizTopic.set('');
+    this.usedQuestions.clear();
+    this.showLastResult.set(false);
+    this.showHistory.set(false);
+  }
+
+  toggleHistory() {
+    this.showHistory.update(show => !show);
+  }
+
+  getCorrectAnswerText(result: QuizResult): string {
+    const question = result.question;
+    switch (question.type) {
+      case 'multiple-choice':
+        return question.options[question.correctAnswer];
+      case 'text-input':
+        return question.correctAnswer;
+      case 'slider':
+        return `${question.correctAnswer}${question.unit || ''} (±${question.tolerance})`;
+      case 'true-false-confidence':
+        return question.correctAnswer ? 'True' : 'False';
+      case 'multi-select':
+        return question.correctAnswers.map(idx => question.options[idx]).join(', ');
+      default:
+        return 'N/A';
+    }
+  }
+
+  getUserAnswerText(result: QuizResult): string {
+    const question = result.question;
+    const answer = result.userAnswer;
+
+    switch (question.type) {
+      case 'multiple-choice':
+        return question.options[answer];
+      case 'text-input':
+        return answer;
+      case 'slider':
+        return `${answer}${question.unit || ''}`;
+      case 'true-false-confidence':
+        return `${answer.answer ? 'True' : 'False'} (${answer.confidence}% confident)`;
+      case 'multi-select':
+        return answer.map((idx: number) => question.options[idx]).join(', ');
+      default:
+        return String(answer);
+    }
   }
 
   private getResultsContext(): string {

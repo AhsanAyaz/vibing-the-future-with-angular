@@ -277,15 +277,31 @@
                 </div>
               }
 
-              <button
-                class="btn btn-primary btn-lg w-full mt-6"
-                (click)="submitAnswer()"
-                [disabled]="!canSubmit()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-                Submit Answer
-              </button>
+              @if (!showLastResult()) {
+                <button
+                  class="btn btn-primary btn-lg w-full mt-6"
+                  (click)="submitAnswer()"
+                  [disabled]="!canSubmit() || isEvaluating()">
+                  @if (isEvaluating()) {
+                    <span class="loading loading-spinner loading-sm"></span>
+                    <span>Evaluating Answer...</span>
+                  } @else {
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Submit Answer</span>
+                  }
+                </button>
+              } @else {
+                <button
+                  class="btn btn-secondary btn-lg w-full mt-6"
+                  (click)="nextQuestion()">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                  Next Question
+                </button>
+              }
             </div>
           </div>
 
@@ -325,10 +341,74 @@
 
         <!-- Actions -->
         <div class="flex gap-2 justify-end">
+          @if (results().length > 0) {
+            <button class="btn btn-info" (click)="toggleHistory()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
+              </svg>
+              View History ({{ results().length }})
+            </button>
+          }
           <button class="btn btn-ghost" (click)="restartQuiz()">
             🔄 Start Over
           </button>
         </div>
+
+        <!-- History Modal -->
+        @if (showHistory()) {
+          <div class="modal modal-open">
+            <div class="modal-box max-w-4xl max-h-[80vh]">
+              <h3 class="font-bold text-2xl mb-4">📊 Quiz History</h3>
+
+              <div class="space-y-4 overflow-y-auto max-h-[60vh]">
+                @for (result of results(); track result.questionId) {
+                  <div class="card bg-base-200">
+                    <div class="card-body p-4">
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                          <div class="flex items-center gap-2 mb-2">
+                            <span class="text-lg">{{ getQuestionTypeIcon(result.questionType) }}</span>
+                            <span class="font-semibold">Question {{ $index + 1 }}</span>
+                            <span class="badge"
+                                  [class.badge-success]="result.correct"
+                                  [class.badge-error]="!result.correct">
+                              {{ result.correct ? '✓ Correct' : '✗ Incorrect' }}
+                            </span>
+                          </div>
+                          <p class="text-sm mb-3">{{ result.question.question }}</p>
+
+                          <div class="grid grid-cols-1 gap-2 text-sm">
+                            <div class="bg-base-300 p-2 rounded">
+                              <strong>Your Answer:</strong>
+                              <span class="ml-2">{{ getUserAnswerText(result) }}</span>
+                            </div>
+                            @if (!result.correct) {
+                              <div class="bg-success/20 p-2 rounded">
+                                <strong>Correct Answer:</strong>
+                                <span class="ml-2">{{ getCorrectAnswerText(result) }}</span>
+                              </div>
+                            }
+                            @if (result.question.explanation) {
+                              <div class="bg-info/20 p-2 rounded">
+                                <strong>Explanation:</strong>
+                                <span class="ml-2">{{ result.question.explanation }}</span>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="modal-action">
+                <button class="btn" (click)="toggleHistory()">Close</button>
+              </div>
+            </div>
+          </div>
+        }
 
         <!-- How It Works -->
         <div class="alert alert-info">
