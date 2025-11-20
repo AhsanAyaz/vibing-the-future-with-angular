@@ -18,8 +18,8 @@ echo -e "${BLUE}📊 Building slides...${NC}"
 npm ci
 npm run build
 
-if [ ! -d "dist/reveal-multi-slides-template" ]; then
-    echo -e "${RED}❌ Slides build failed - dist/reveal-multi-slides-template not found${NC}"
+if [ ! -d "dist/vibing-the-future-with-angular" ]; then
+    echo -e "${RED}❌ Slides build failed - dist/vibing-the-future-with-angular not found${NC}"
     exit 1
 fi
 
@@ -29,7 +29,7 @@ echo -e "${GREEN}✅ Slides built successfully${NC}"
 echo -e "${BLUE}📱 Building Angular app...${NC}"
 cd angular-webllm-app
 npm ci
-npm run build
+npm run build -- --base-href /vibing-the-future-with-angular/app/
 
 if [ ! -d "dist/angular-webllm-app/browser" ]; then
     echo -e "${RED}❌ Angular app build failed - dist/angular-webllm-app/browser not found${NC}"
@@ -45,7 +45,7 @@ rm -rf deploy
 mkdir -p deploy
 
 # Copy slides to root
-cp -r dist/reveal-multi-slides-template/* deploy/
+cp -r dist/vibing-the-future-with-angular/* deploy/
 
 # Copy Angular app to /app subdirectory
 mkdir -p deploy/app
