@@ -1,5 +1,5 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+# Workflow for deploying slides and Angular app to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   # Runs on pushes targeting the default branch
@@ -30,22 +30,44 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - name: Install dependencies
+
+      # Build slides
+      - name: Install slides dependencies
         run: npm ci
-      - name: Build
+
+      - name: Build slides
         run: npm run build
+
+      # Build Angular app
+      - name: Install Angular app dependencies
+        run: cd angular-webllm-app && npm ci
+
+      - name: Build Angular app
+        run: cd angular-webllm-app && npm run build
+
+      # Prepare deployment directory with both slides and app
+      - name: Prepare deployment directory
+        run: |
+          mkdir -p deploy
+          cp -r dist/reveal-multi-slides-template/* deploy/
+          mkdir -p deploy/app
+          cp -r angular-webllm-app/dist/angular-webllm-app/browser/* deploy/app/
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload dist folder
-          path: './dist/reveal-multi-slides-template'
+          # Upload combined deployment folder
+          path: './deploy'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
