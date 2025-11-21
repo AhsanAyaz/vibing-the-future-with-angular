@@ -10,9 +10,15 @@
 
 <!-- .element style="font-size: 34px;" -->
 
+Author | GDE in AI & Angular
+
+<!-- .element style="font-size: 24px;" -->
+
 Software Architect @ Scania
 
-<!-- .element style="font-size: 34px;" -->
+<!-- .element style="font-size: 24px;" -->
+
+<img src="assets/images/session-QR-tj8oW.png" style="position: fixed; bottom: 0; right: 0; width: 210px;" alt="Session QR"/>
 
 ---
 
@@ -26,6 +32,9 @@ Looking at my backlog of features to build.
 
 <!-- .element: class="fragment" -->
 
+Notes:
+(Laughter) Good morning, everyone! How many of you look at your backlog on a Monday morning and feel exactly like this? (Gesture to GIF) That overwhelming feeling, the endless list of tasks... we've all been there.
+
 --
 
 **43 tickets. 2 weeks. 1 developer.**
@@ -33,9 +42,6 @@ Looking at my backlog of features to build.
 ![Internal screaming](https://media.giphy.com/media/3o7qDSOvfaCO9b3MlO/giphy.gif)
 
 <!-- .element: class="fragment" -->
-
-Notes:
-(Laughter) Good morning, everyone! How many of you look at your backlog on a Monday morning and feel exactly like this? (Gesture to GIF) That overwhelming feeling, the endless list of tasks... we've all been there. This is what I call "Story Listening" – connecting through those shared experiences. The GIFs, by the way, are here to add a bit of levity and keep things conversational and authentic.
 
 ---
 
@@ -46,6 +52,9 @@ Notes:
 
 <!-- .element: class="fragment" -->
 
+Notes:
+But don't worry, we're not staying in that state of despair for long! There's hope. As the brilliant Addy Osmani from the Google Chrome Team once said, "Good code is like a love letter to the next developer who will maintain it." That quote really resonates with me. It reminds us of the human element in our work, and it’s a perfect segue into our journey today. Think of Addy as our wise mentor as we embark on this adventure.
+
 --
 
 **Today's revelation:** What if AI could help us write those love letters faster, better, and with less tears?
@@ -53,9 +62,6 @@ Notes:
 ![Mind blown](https://media.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.gif)
 
 <!-- .element: class="fragment" -->
-
-Notes:
-But don't worry, we're not staying in that state of despair for long! There's hope. As the brilliant Addy Osmani from the Google Chrome Team once said, "Good code is like a love letter to the next developer who will maintain it." That quote really resonates with me. It reminds us of the human element in our work, and it’s a perfect segue into our journey today. Think of Addy as our wise mentor as we embark on this adventure.
 
 ---
 
@@ -66,6 +72,9 @@ The Developer's Dilemma
 ### (Or: Why We Can't Have Nice Things)
 
 ![Stressed developer](https://media.giphy.com/media/l46Cy1rHbQ92uuLXa/giphy.gif)
+
+Notes:
+Now, let's talk about the developer's dilemma. This is where we descend into the problem, the "man in a hole" story arc.
 
 ---
 
@@ -89,12 +98,15 @@ The Developer's Dilemma
 
 <!-- .element: class="fragment" -->
 
+Notes:
+We all want nice things, performant web apps, but let's be real: we're drowning in JavaScript. (Pause for effect) The numbers don't lie. HTTP Archive's Web Almanac 2024 shows that the average JavaScript payload is 2.4MB, up 35% from 2023. Only 31.2% of sites pass Core Web Vitals, and for Angular apps, a staggering 68% fail. It's tough out there, and sometimes, it feels like this, right? (Point to "This is fine" meme)
+
 --
 
 ![This is fine meme](https://media.giphy.com/media/QMHoU66sBXqqLqYvGO/giphy.gif)
 
 Notes:
-Now, let's talk about the developer's dilemma. This is where we descend into the problem, the "man in a hole" story arc. We all want nice things, performant web apps, but let's be real: we're drowning in JavaScript. (Pause for effect) The numbers don't lie. HTTP Archive's Web Almanac 2024 shows that the average JavaScript payload is 2.4MB, up 35% from 2023. Only 31.2% of sites pass Core Web Vitals, and for Angular apps, a staggering 68% fail. It's tough out there, and sometimes, it feels like this, right? (Point to "This is fine" meme) We're in denial, pretending everything is fine while our users suffer.
+We're in denial, pretending everything is fine while our users suffer.
 
 ---
 
