@@ -110,10 +110,10 @@ We're in denial, pretending everything is fine while our users suffer.
 
 ---
 
-### Addy Osmani's Law of JavaScript
+### The cost of JavaScript
 
 > "There is a cost to JavaScript beyond the download. Parse & compile can be 2-5x as long as download."
-> — **Addy Osmani**
+> — **Someone wise**
 
 <!-- .element: class="fragment" -->
 
@@ -121,9 +121,12 @@ We're in denial, pretending everything is fine while our users suffer.
 
 <!-- .element: class="fragment" -->
 
+Notes:
+Addy Osmani mentions that there's a cost beyond just downloading the code; parsing and compiling can take 2 to 5 times longer. So, that 2.4MB bundle? Your users are actually feeling it like a 10MB download. This is especially true on mobile devices, and even more so here in Italy, where network conditions can vary. (Pause, gesture to GIF) We all know this feeling, right? That endless waiting... it's a universal pain. This isn't just about abstract numbers; it's about real user experience.
+
 --
 
-**Especially on mobile. Especially in Italy. 🇮🇹**
+**Especially on mobile. Even in Italy. 🇮🇹**
 
 ![Waiting](https://media.giphy.com/media/tXL4FHPSnVJ0A/giphy.gif)
 
@@ -162,12 +165,15 @@ export class FeatureComponent implements OnInit, OnDestroy, AfterViewInit {
 
 <!-- .element: class="fragment" -->
 
+Notes:
+And what does this look like in our Angular codebases? Well, take a look at this. (Point to code snippet) This is typical Monday morning code, right? We have components implementing `OnInit`, `OnDestroy`, `AfterViewInit`, and a whole host of subscriptions. Hundreds of lines of setup code, RxJS chains that go on forever...
+
 --
 
 ![Confused math lady](https://media.giphy.com/media/WRQBXSCnEFJIuxktnw/giphy.gif)
 
 Notes:
-And what does this look like in our Angular codebases? Well, take a look at this. (Point to code snippet) This is typical Monday morning code, right? We have components implementing `OnInit`, `OnDestroy`, `AfterViewInit`, and a whole host of subscriptions. Hundreds of lines of setup code, RxJS chains that go on forever... (Pause, gesture to GIF) And then, the eternal question: "Did I remember to unsubscribe?" If you've ever debugged a subscription leak, you know this feeling perfectly. We're at the bottom of the hole now, feeling overwhelmed and frustrated.
+(Pause, gesture to GIF) And then, the eternal question: "Did I remember to unsubscribe?" If you've ever debugged a subscription leak, you know this feeling perfectly. We're at the bottom of the hole now, feeling overwhelmed and frustrated.
 
 ---
 
@@ -227,7 +233,7 @@ This is our traditional development cycle, a true "Circle of Life" of suffering.
 ![Discovery moment](https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif)
 
 Notes:
-But then, something shifted. This was my Act II, the discovery. It was like AI walked into my life and offered a path forward. (Gesture to GIF) That moment of curiosity, shifting from despair to hope – it felt like a true "Call to Adventure."
+But then, something shifted. It was like AI walked into my life and offered a path forward. (Gesture to GIF) That moment of curiosity, shifting from despair to hope – it felt like a true "Call to Adventure."
 
 ---
 
@@ -306,6 +312,9 @@ Patient data → Your server → OpenAI → Response → Your server → User
 **GDPR compliance:** 🚨 RED ALERT 🚨
 
 <!-- .element: class="fragment" -->
+
+Notes:
+This brings us to the privacy revolution. Consider a real scenario: a medical records app needing AI-powered search. Traditionally, patient data goes from your server to OpenAI, back to your server, and then to the user. This is a huge GDPR red alert! But with Web-LLM, the patient data goes directly to the browser AI, and the response comes back without ever leaving the device. (Gesture to GIF) Perfect! This is a universal story of right and wrong – everyone understands privacy is a fundamental right. And the contrast here shows a clear resolution to a major conflict, bringing immense relief and satisfaction.
 
 --
 
@@ -600,7 +609,7 @@ But let's be honest, there's a "Vibe Coding" trap out there. What Twitter promis
 
 --
 
-**Addy Osmani's wisdom applies here too:**
+Remember?
 
 > "The cost of JavaScript beyond the download..."
 
@@ -677,12 +686,15 @@ This diagram illustrates the professional workflow. It's not a shortcut, there's
 
 --
 
-#### 2. Gemini 2.5 Flash
+#### 2. Gemini 3 Pro Preview
 
-- 1 million+ token context (entire codebases)
-- Input: `$0.30` / `1M` tokens, Output: `$2.50` / `1M` tokens
-- Multimodal (text, images, code)
-- Fast streaming responses
+- Knowledge cut off: Jan 2025
+
+- `<=200K tokens • Input: $2.00 / Output: $12.00`
+
+- `> 200K tokens • Input: $4.00 / Output: $18.00`
+
+- modelname: `gemini-3-pro-preview`
 
 <!-- .element: class="fragment" -->
 
@@ -716,7 +728,7 @@ Let's talk about the essential tools of the trade. First, Cline: it's free, open
 
 --
 
-**Challenge:** Add an email generator component
+**Challenge:** Add a newsletter generator component
 
 ![Ready to work](https://media.giphy.com/media/LmNwrBhejkK9EFP504/giphy.gif)
 
@@ -730,7 +742,8 @@ Let's talk about the essential tools of the trade. First, Cline: it's free, open
 <!-- .element: class="fragment" -->
 
 Notes:
-(Transition to live demo) Now, for the ultimate proof: Live Demo 3. Our challenge: add an email generator component. The old way, this would take 1 to 2 hours. With AI-assisted development, we're aiming for 10 minutes. (Gesture to Ready to work GIF) Let's watch this workflow in action! This demo will run for about 10 minutes.
+(Transition to live demo) Now, for the ultimate proof: Live Demo 3. Our challenge: add a newsletter generator component. The old way, this would take 1 to 2 hours. With AI-assisted development, we're aiming for 10 minutes. (Gesture to Ready to work GIF) Let's watch this workflow in action! This demo will run for about 10 minutes.Prompt:
+Create a new component in the Angular app inside vibing-with-angular folder, that generates a newsletter with some different tones & configurations on the topic, using WebLLM, similar usage to the other exisiting components. The output should be markdown (that can be copy pasted to ghost.org).
 
 ---
 
@@ -1085,10 +1098,10 @@ This is the future we're building: On-device AI + Modern Angular. (Point to list
 
 <!-- .element: class="fragment" -->
 
---
-
 3️⃣ **Modernize your Angular** - Signals, standalone, native control flow
 → Start: [angular.dev/guide/signals](https://angular.dev)
+
+<!-- .element: class="fragment" -->
 
 ![Let's go](https://media.giphy.com/media/l0IylOPCNkiqOgMyA/giphy.gif)
 
@@ -1099,90 +1112,38 @@ Your journey starts here, today. I have three concrete things you can do immedia
 
 ---
 
+### Bonus: The Meta Reveal
+
 <!-- .slide: style="font-size: 1.8rem" -->
 
-<!-- THE CLOSING: Bringing it home -->
+![Mind blown](https://media.giphy.com/media/3o7527pa7qs9kCG78A/giphy.gif)
 
-## Key Takeaways
+<!-- .element style="height: 250px;" -->
 
-### The 5 Truths
-
-1️⃣ **On-device AI is production-ready** - Web-LLM delivers privacy + performance
+**Plot twist:** This entire presentation was restructured using AI + storytelling tactics.
 
 <!-- .element: class="fragment" -->
 
-2️⃣ **Modern Angular is the foundation** - Signals + standalone = intelligent UX at scale
-
-<!-- .element: class="fragment" -->
-
-3️⃣ **Vibe coding ≠ Engineering** - 70% speed, 100% technical debt
-
-<!-- .element: class="fragment" -->
-
-4️⃣ **AI-assisted engineering works** - 5x faster, same quality, if done right
-
-<!-- .element: class="fragment" -->
-
-5️⃣ **You're an architect now** - Design systems, curate AI, validate everything
-
-<!-- .element: class="fragment" -->
-
-Notes:
-To bring it all home, here are the five key takeaways, the "Five Truths" from our journey today. (Point to list) One: On-device AI is production-ready, delivering both privacy and performance. Two: Modern Angular is the essential foundation for intelligent UX at scale. Three: "Vibe coding" is not engineering; it gives you 70% speed but 100% technical debt. Four: AI-assisted engineering _does_ work, making you 5x faster with the same or higher quality, but only if done right. And five: You are an architect now – design systems, curate AI outputs, and validate everything. These are the teachable moments distilled from our story.
-
----
-
-### Remember Addy Osmani's Wisdom
-
-> "Good code is like a love letter to the next developer who will maintain it."
-
-<!-- .element: class="fragment" -->
-
-**With AI, we can write better love letters, faster.**
+**Time to create this narrative version:** 2 hours with AI assistance
 
 <!-- .element: class="fragment" -->
 
 --
 
-**But we must remain the authors.**
-
-![Heart](https://media.giphy.com/media/3o6ZsVbs2GzgKNvVpS/giphy.gif)
-
-<!-- .element: class="fragment" -->
-
-**You're not being replaced. You're being elevated.**
-
-<!-- .element: class="fragment" -->
-
-Notes:
-Let's circle back to where we started, to Addy Osmani's wisdom: "Good code is like a love letter to the next developer who will maintain it." (Pause) After this journey, that metaphor has a much deeper meaning. With AI, we can absolutely write better love letters, and we can write them faster. But – and this is crucial – we must remain the authors. (Gesture to heart GIF) You're not being replaced by AI; you are being elevated. This is a message of reassurance, elevation, and inspiration.
-
----
-
 <!-- .slide: style="font-size: 1.8rem" -->
 
-### My Journey = Your Journey
+**Time it would have taken manually:** 8-10 hours
 
-![Hero's journey](https://media.giphy.com/media/l4FGp6wKxMULYtDpe/giphy.gif)
-
-**From:** 43 tickets, overwhelming backlog, burnout approaching
+**The tools work. The future is here. You just witnessed it.**
 
 <!-- .element: class="fragment" -->
 
-**To:** Building this entire demo app + presentation in 12 hours with AI assistance
-
-<!-- .element: class="fragment" -->
-
-**The difference:** Tools, mindset, and Modern Angular
-
-<!-- .element: class="fragment" -->
-
-**You can do this too. Starting today.**
+![Mic drop](https://media.giphy.com/media/3o7qDEq2bMbcbPRQ2c/giphy.gif)
 
 <!-- .element: class="fragment" -->
 
 Notes:
-My journey from that overwhelming backlog to building this entire demo app and presentation in just 12 hours with AI assistance... that can be your journey too. The difference wasn't magic; it was the right tools, a shifted mindset, and embracing Modern Angular. (Gesture to hero's journey GIF) This is a universal story: everyone wants transformation from overwhelm to mastery. You can do this too. Starting today.
+Now, for a bonus... (Gesture to Mind blown GIF) A plot twist! This _entire_ presentation, from its initial structure to many of its narratives and points, was restructured and enhanced using AI and advanced storytelling tactics. It took me only 2 hours with AI assistance, compared to 8-10 hours manually. The tools work. The future is here. You just witnessed it. (Gesture to mic drop GIF)
 
 ---
 
@@ -1190,27 +1151,9 @@ My journey from that overwhelming backlog to building this entire demo app and p
 
 <!-- .slide: style="font-size: 1.8rem" -->
 
-**Demo Code & Examples:**
+![QR](assets/images/session-QR-tj8oW.png)
 
-- This presentation's app: [github.com/AhsanAyaz/vibing-the-future-with-angular]
-- Web-LLM Angular examples: [mlc.ai/web-llm]
-
-<!-- .element: class="fragment" -->
-
-**Tools:**
-
-- Cline: [VSCode Marketplace]
-- Gemini API: [ai.dev]
-- Modern Angular: [angular.dev]
-
-<!-- .element: class="fragment" -->
-
-**Learning:**
-
-- Addy Osmani's Performance work: [addyosmani.com]
-- Chrome DevTools: [developer.chrome.com]
-
-<!-- .element: class="fragment" -->
+<!-- .element: class="fragment" style="width: 400px; margin: 0 auto;" -->
 
 Notes:
 Here are some practical resources to help you on your journey. (Point to list) You can find the demo code and examples for this presentation's app on GitHub, and Web-LLM Angular examples on mlc.ai/web-llm. For tools, check out Cline in the VSCode Marketplace, the Gemini API at ai.dev, and resources for Modern Angular on angular.dev. And for learning, delve into Addy Osmani's performance work and Chrome DevTools. This is your map and your toolkit!
@@ -1255,38 +1198,3 @@ Here are some practical resources to help you on your journey. (Point to list) Y
 
 Notes:
 (Gesture to Italy celebration GIF) Thank you, Angular Italy! Grazie mille! Go build something intelligent. And remember: You're the architect. AI is your apprentice. This is our moment of triumph, a celebration of community, and a readiness for the future. You are in control, you are elevated, and you have the tools to achieve your "Happy Ever After."
-
----
-
-### Bonus: The Meta Reveal
-
-<!-- .slide: style="font-size: 1.8rem" -->
-
-![Mind blown](https://media.giphy.com/media/3o7527pa7qs9kCG78A/giphy.gif)
-
-<!-- .element style="height: 250px;" -->
-
-**Plot twist:** This entire presentation was restructured using AI + storytelling tactics.
-
-<!-- .element: class="fragment" -->
-
-**Time to create this narrative version:** 2 hours with AI assistance
-
-<!-- .element: class="fragment" -->
-
---
-
-<!-- .slide: style="font-size: 1.8rem" -->
-
-**Time it would have taken manually:** 8-10 hours
-
-**The tools work. The future is here. You just witnessed it.**
-
-<!-- .element: class="fragment" -->
-
-![Mic drop](https://media.giphy.com/media/3o7qDEq2bMbcbPRQ2c/giphy.gif)
-
-<!-- .element: class="fragment" -->
-
-Notes:
-Now, for a bonus... (Gesture to Mind blown GIF) A plot twist! This _entire_ presentation, from its initial structure to many of its narratives and points, was restructured and enhanced using AI and advanced storytelling tactics. It took me only 2 hours with AI assistance, compared to 8-10 hours manually. The tools work. The future is here. You just witnessed it. (Gesture to mic drop GIF)
