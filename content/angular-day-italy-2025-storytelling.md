@@ -1,8 +1,8 @@
-# Vibing the Future with Angular (story)
+# Vibing the Future with Angular
 
 <!-- .element style="font-size: 80px;" -->
 
-#### A Developer's Journey from Chaos to AI-Powered Zen
+#### Leveraging Gemini & Web-LLM for Intelligent Experiences
 
 <!-- .element style="font-size: 34px;" -->
 
