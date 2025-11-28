@@ -25,6 +25,7 @@ style: |
 ---
 
 <!-- _class: lead -->
+
 # 🎵 Vibing the Future with Angular
 
 ## Leveraging Gemini & Web-LLM for Intelligent Experiences
@@ -39,13 +40,14 @@ style: |
 
 Software Architect | Angular Enthusiast | AI Explorer
 
-*"I write code that sometimes works on the first try... sometimes."*
+_"I write code that sometimes works on the first try... sometimes."_
 
 ---
 
 # 🤔 Quick Question
 
 **Who here has:**
+
 - ✅ Used ChatGPT to debug code?
 - ✅ Asked AI to explain a complex concept?
 - ✅ Let AI write commit messages? (No judgment!)
@@ -60,6 +62,7 @@ Software Architect | Angular Enthusiast | AI Explorer
 <div>
 
 ## Part 1: AI in Your App
+
 - 🤖 Google Gemini + Angular
 - 💻 Web-LLM (On-device AI)
 - 💬 Live Chat Demo
@@ -68,6 +71,7 @@ Software Architect | Angular Enthusiast | AI Explorer
 <div>
 
 ## Part 2: AI as Your Copilot
+
 - ⚡ "Vibe Coding" workflow
 - 🛠️ VSCode + Cline/Gemini
 - 🎨 Smarter development
@@ -80,21 +84,24 @@ Software Architect | Angular Enthusiast | AI Explorer
 <!-- _class: lead -->
 
 # Part 1
+
 ## 🤖 AI-Powered Angular Apps
 
-*"Making your app smarter than your average developer"*
-*(Just kidding, you're all brilliant)* 😄
+_"Making your app smarter than your average developer"_
+_(Just kidding, you're all brilliant)_ 😄
 
 ---
 
 # 🌐 The Intelligent Web is HERE
 
 Traditional Web Apps:
+
 ```
 User Input → Static Logic → Predictable Output
 ```
 
 **Intelligent Web Apps:**
+
 ```
 User Input → AI Processing → Dynamic, Contextual Output
 ```
@@ -109,6 +116,7 @@ User Input → AI Processing → Dynamic, Contextual Output
 <div>
 
 ## Angular Brings:
+
 - 🏗️ Solid architecture
 - 🔄 Reactive patterns (RxJS)
 - 🎨 Component-based UI
@@ -118,6 +126,7 @@ User Input → AI Processing → Dynamic, Contextual Output
 <div>
 
 ## AI Adds:
+
 - 🧠 Intelligence layer
 - 🎨 Dynamic content
 - 💬 Natural interaction
@@ -159,7 +168,7 @@ import { CreateMLCEngine } from '@mlc-ai/web-llm';
 const engine = await CreateMLCEngine('Llama-3.1-8B-Instruct');
 
 const reply = await engine.chat.completions.create({
-  messages: [{ role: 'user', content: 'Hello!' }]
+  messages: [{ role: 'user', content: 'Hello!' }],
 });
 
 console.log(reply.choices[0].message.content);
@@ -178,9 +187,7 @@ export class AIService {
   private useWebLLM = navigator.onLine === false;
 
   async chat(message: string) {
-    return this.useWebLLM
-      ? this.webLLMChat(message)
-      : this.geminiChat(message);
+    return this.useWebLLM ? this.webLLMChat(message) : this.geminiChat(message);
   }
 }
 ```
@@ -192,10 +199,11 @@ export class AIService {
 <!-- _class: lead -->
 
 # 💬 Demo Time!
+
 ## Streaming Chat with Angular + Gemini
 
-*"Live demos: where everything works perfectly..."*
-*"...said no developer ever"* 😅
+_"Live demos: where everything works perfectly..."_
+_"...said no developer ever"_ 😅
 
 ---
 
@@ -207,13 +215,13 @@ export class AIService {
   template: `
     <div class="messages">
       @for (msg of messages(); track msg.id) {
-        <div class="message" [class.user]="msg.role === 'user'">
-          {{ msg.content }}
-        </div>
+      <div class="message" [class.user]="msg.role === 'user'">
+        {{ msg.content }}
+      </div>
       }
     </div>
     <input [(ngModel)]="input" (keyup.enter)="send()" />
-  `
+  `,
 })
 export class ChatComponent {
   messages = signal<Message[]>([]);
@@ -226,35 +234,13 @@ export class ChatComponent {
 
 ---
 
-# 🌊 Streaming Implementation
-
-```typescript
-async send() {
-  const userMessage = this.input;
-  this.messages.update(m => [...m, { role: 'user', content: userMessage }]);
-
-  const aiMessage = { role: 'assistant', content: '' };
-  this.messages.update(m => [...m, aiMessage]);
-
-  const stream = await this.model.generateContentStream(userMessage);
-
-  for await (const chunk of stream.stream) {
-    aiMessage.content += chunk.text();
-    this.messages.update(m => [...m]); // Trigger change detection
-  }
-}
-```
-
-**Power of Signals:** Reactive updates without complex RxJS! ✨
-
----
-
 # 🎨 Practical Use Cases
 
 <div class="columns">
 <div>
 
 ## Customer-Facing
+
 - 💬 Smart chatbots
 - 🔍 Semantic search
 - 📝 Content generation
@@ -265,6 +251,7 @@ async send() {
 <div>
 
 ## Internal Tools
+
 - 📚 Documentation Q&A
 - 🐛 Error explanation
 - 💡 Code suggestions
@@ -279,21 +266,24 @@ async send() {
 <!-- _class: lead -->
 
 # 💡 Demo: 4 Real-World Examples
+
 ## Built with Angular + Web-LLM
 
-*All running 100% in your browser!*
+_All running 100% in your browser!_
 
 ---
 
 # 📚 Demo 1: Document Analyzer
 
 **What it does:**
+
 - Upload any document (text, markdown, JSON)
 - Get AI-powered summary and key points
 - Analyze sentiment and extract topics
 - Ask questions about the content
 
 **Use cases:**
+
 - Legal document review
 - Research paper analysis
 - Contract summarization
@@ -304,11 +294,13 @@ async send() {
 # 📝 Demo 2: Smart Form Assistant
 
 **What it does:**
+
 - Fill basic info (name, company, role)
 - Click "AI Suggest" to auto-generate descriptions
 - Get context-aware technical requirements
 
 **Use cases:**
+
 - Project proposals
 - RFP responses
 - Technical documentation
@@ -321,12 +313,14 @@ async send() {
 # 💻 Demo 3: Code Explainer
 
 **What it does:**
+
 - Paste any code (JS, Python, TypeScript, etc.)
 - Choose explanation level (beginner/intermediate/expert)
 - Get step-by-step breakdown
 - Identify potential issues and improvements
 
 **Use cases:**
+
 - Code review assistance
 - Learning new languages
 - Debugging complex code
@@ -337,12 +331,14 @@ async send() {
 # ✉️ Demo 4: Email Generator
 
 **What it does:**
+
 - Input recipient, subject, and key points
 - Select tone (formal, friendly, casual, persuasive)
 - Generate professional emails
 - Refine with "make shorter," "more formal," etc.
 
 **Use cases:**
+
 - Client communications
 - Internal announcements
 - Sales outreach
@@ -375,20 +371,23 @@ readonly debouncedInput = toSignal(
 <!-- _class: lead -->
 
 # Part 2
+
 ## ⚡ AI-Powered Development
 
-*"Vibe Coding: When you and AI become BFFs"*
+_"Vibe Coding: When you and AI become BFFs"_
 
 ---
 
 # 🤝 What is "Vibe Coding"?
 
 **Traditional Coding:**
+
 ```
 Think → Code → Debug → Google → Stack Overflow → Cry → Repeat
 ```
 
 **Vibe Coding:**
+
 ```
 Think → Describe to AI → Review → Ship 🚀
 ```
@@ -400,6 +399,7 @@ Think → Describe to AI → Review → Ship 🚀
 # 🛠️ Tools in Action: Cline + Gemini
 
 **Cline (VSCode Extension):**
+
 - 🤖 AI assistant in your editor
 - 💬 Natural language commands
 - 🔧 Automated refactoring
@@ -419,6 +419,7 @@ code --install-extension saoudrizwan.claude-dev
 **You:** "Create an Angular service that caches API responses"
 
 **AI:** Generates:
+
 ```typescript
 @Injectable()
 export class CachedHttpService {
@@ -426,9 +427,7 @@ export class CachedHttpService {
 
   get<T>(url: string): Observable<T> {
     if (!this.cache.has(url)) {
-      this.cache.set(url,
-        this.http.get<T>(url).pipe(shareReplay(1))
-      );
+      this.cache.set(url, this.http.get<T>(url).pipe(shareReplay(1)));
     }
     return this.cache.get(url)!;
   }
@@ -458,6 +457,7 @@ export class CachedHttpService {
 <div>
 
 ## Code Tasks
+
 - 🔄 Refactoring legacy code
 - 📝 Writing tests
 - 📖 Generating docs
@@ -468,6 +468,7 @@ export class CachedHttpService {
 <div>
 
 ## Smart Tasks
+
 - 📋 Commit messages
 - 🔍 Code reviews
 - 💡 Architecture suggestions
@@ -482,6 +483,7 @@ export class CachedHttpService {
 # ⚠️ The "Vibe Check" - When to Trust AI
 
 ✅ **Trust more:**
+
 - Boilerplate code
 - Standard patterns
 - Unit tests
@@ -489,6 +491,7 @@ export class CachedHttpService {
 - Simple utilities
 
 ❌ **Review carefully:**
+
 - Security code
 - Performance-critical paths
 - Complex business logic
@@ -502,6 +505,7 @@ export class CachedHttpService {
 **Old way:** Search docs → Read for 30 min → Still confused
 
 **New way:**
+
 ```
 You: "Explain Angular standalone components like
       I'm explaining it to my grandma"
@@ -534,7 +538,7 @@ Based on my experience:
 
 # 🎯 Bringing It All Together
 
-*"Your Angular app can now think AND you can build it faster!"*
+_"Your Angular app can now think AND you can build it faster!"_
 
 ---
 
@@ -595,10 +599,12 @@ readonly streamingResponse = signal('');
 # 🎯 3 Practical Projects to Start
 
 1. **🤖 Smart FAQ Bot**
+
    - Use Gemini to answer product questions
    - ~100 lines of code
 
 2. **✍️ Content Generator**
+
    - Generate blog posts, descriptions
    - Great for e-commerce
 
@@ -611,15 +617,18 @@ readonly streamingResponse = signal('');
 # ⚠️ Important Considerations
 
 **🔒 Security:**
+
 - Never send sensitive data to cloud AI without encryption
 - Sanitize AI outputs (XSS risk!)
 - Rate limit AI requests
 
 **💰 Costs:**
+
 - Gemini: Free tier → Paid at scale
 - Web-LLM: Free, but bandwidth for initial download
 
 **🎯 UX:**
+
 - Always show loading states
 - Handle errors gracefully
 - Provide fallbacks
@@ -629,6 +638,7 @@ readonly streamingResponse = signal('');
 # 🌟 The Future is Bright
 
 **What's coming:**
+
 - 🔊 Multimodal AI (voice, images, video)
 - ⚡ Faster on-device models
 - 🧠 Better reasoning capabilities
@@ -642,14 +652,17 @@ readonly streamingResponse = signal('');
 # 📚 Resources
 
 **Gemini:**
+
 - [ai.google.dev](https://ai.google.dev)
 - [@google/generative-ai](https://www.npmjs.com/package/@google/generative-ai)
 
 **Web-LLM:**
+
 - [mlc.ai/web-llm](https://mlc.ai/web-llm)
 - [@mlc-ai/web-llm](https://www.npmjs.com/package/@mlc-ai/web-llm)
 
 **Vibe Coding:**
+
 - [Cline VSCode Extension](https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev)
 
 ---
@@ -671,12 +684,13 @@ readonly streamingResponse = signal('');
 ## Questions? 🙋
 
 **Let's connect:**
+
 - 🐦 Twitter: @yourhandle
 - 💼 LinkedIn: your-profile
 - 🌐 Blog: your-blog.com
 - 📧 Email: your@email.com
 
-*"May your builds be fast and your AI prompts be accurate!"* 🚀
+_"May your builds be fast and your AI prompts be accurate!"_ 🚀
 
 ---
 
@@ -686,7 +700,7 @@ readonly streamingResponse = signal('');
 
 ### 🇮🇹 Grazie mille!
 
-*Now go build something intelligent!* 🧠✨
+_Now go build something intelligent!_ 🧠✨
 
 **Slides:** github.com/yourusername/vibing-the-future-with-angular
 
@@ -704,11 +718,13 @@ const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 import { CreateMLCEngine } from '@mlc-ai/web-llm';
 const engine = await CreateMLCEngine('Llama-3.1-8B-Instruct');
 
-// Streaming
-for await (const chunk of stream.stream) {
-  response += chunk.text();
-}
-
-// Angular Signal Integration
-readonly aiResponse = signal('');
+// Streaming with Resource API
+readonly chat = resource({
+  params: () => ({ prompt: this.prompt() }),
+  stream: async ({ params }) => {
+    const state = signal({ value: '' });
+    // ... async generator logic ...
+    return state;
+  }
+});
 ```

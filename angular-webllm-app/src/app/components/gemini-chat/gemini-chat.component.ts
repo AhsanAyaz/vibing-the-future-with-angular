@@ -1,4 +1,11 @@
-import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  signal,
+  inject,
+  ChangeDetectionStrategy,
+  resource,
+  ResourceStreamItem,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -42,14 +49,77 @@ export class GeminiChatComponent {
 
   // State
   readonly messages = signal<Message[]>([]);
-  readonly isStreaming = signal(false);
-  readonly streamingContent = signal('');
   readonly apiKey = signal('');
   readonly isConfigured = signal(false);
   readonly error = signal<string | null>(null);
 
   // Input
   currentMessage = '';
+
+  // Resource for streaming chat
+  readonly prompt = signal<string | null>(null);
+
+  readonly chatResource = resource({
+    params: () => ({ prompt: this.prompt() }),
+    stream: async ({ params, abortSignal }): Promise<any> => {
+      // Return a signal that tracks the streaming status/value
+      const streamState = signal<ResourceStreamItem<string>>({ value: '' });
+
+      if (!params.prompt || !this.model) {
+        return streamState;
+      }
+
+      const aiMessage: Message = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: '',
+        timestamp: new Date(),
+      };
+
+      // Add placeholder message
+      this.messages.update((msgs) => [...msgs, aiMessage]);
+      this.error.set(null);
+
+      // Start the streaming process
+      (async () => {
+        try {
+          const result = await this.model.generateContentStream(params.prompt);
+
+          for await (const chunk of result.stream) {
+            if (abortSignal.aborted) break;
+            const text = chunk.text();
+
+            // Update the message in the array directly
+            this.messages.update((msgs: Message[]) =>
+              msgs.map((msg: Message) =>
+                msg.id === aiMessage.id ? { ...msg, content: msg.content + text } : msg
+              )
+            );
+
+            // Update the stream state signal
+            streamState.update((prev) => {
+              if ('value' in prev) {
+                return { value: (prev.value ?? '') + text };
+              }
+              return { value: text };
+            });
+          }
+        } catch (err) {
+          console.error('Streaming error:', err);
+          this.error.set(
+            'Failed to get response from Gemini. Check your API key and internet connection.'
+          );
+          // Remove the failed message
+          this.messages.update((msgs: Message[]) =>
+            msgs.filter((msg: Message) => msg.id !== aiMessage.id)
+          );
+          streamState.set({ error: err as Error });
+        }
+      })();
+
+      return streamState;
+    },
+  });
 
   constructor() {
     // Try to load saved API key from localStorage
@@ -113,7 +183,7 @@ export class GeminiChatComponent {
   }
 
   async sendMessage() {
-    if (!this.currentMessage.trim() || this.isStreaming() || !this.isConfigured()) {
+    if (!this.currentMessage.trim() || this.chatResource.isLoading() || !this.isConfigured()) {
       return;
     }
 
@@ -128,45 +198,8 @@ export class GeminiChatComponent {
     const messageText = this.currentMessage;
     this.currentMessage = '';
 
-    // Create placeholder for AI response
-    const aiMessage: Message = {
-      id: crypto.randomUUID(),
-      role: 'assistant',
-      content: '',
-      timestamp: new Date(),
-    };
-    this.messages.update((msgs) => [...msgs, aiMessage]);
-
-    this.isStreaming.set(true);
-    this.streamingContent.set('');
-    this.error.set(null);
-
-    try {
-      const result = await this.model.generateContentStream(messageText);
-
-      for await (const chunk of result.stream) {
-        const text = chunk.text();
-        this.streamingContent.update((current) => current + text);
-
-        // Update the message in the array
-        this.messages.update((msgs) =>
-          msgs.map((msg) =>
-            msg.id === aiMessage.id ? { ...msg, content: this.streamingContent() } : msg
-          )
-        );
-      }
-    } catch (err) {
-      console.error('Streaming error:', err);
-      this.error.set(
-        'Failed to get response from Gemini. Check your API key and internet connection.'
-      );
-
-      // Remove the failed message
-      this.messages.update((msgs) => msgs.filter((msg) => msg.id !== aiMessage.id));
-    } finally {
-      this.isStreaming.set(false);
-      this.streamingContent.set('');
-    }
+    // Trigger the resource
+    this.prompt.set(messageText);
   }
 
   clearChat() {

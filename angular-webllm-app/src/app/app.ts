@@ -1,4 +1,11 @@
-import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  inject,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { WebLLMService } from './services/webllm.service';
@@ -32,7 +39,7 @@ import { DocumentAnalysisService } from './services/document-analysis.service';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
-  templateUrl: './app.html'
+  templateUrl: './app.html',
 })
 export class App implements OnInit {
   protected readonly title = 'AI-Powered Angular Demos';
@@ -41,7 +48,23 @@ export class App implements OnInit {
   readonly docService = inject(DocumentAnalysisService);
   private readonly router = inject(Router);
 
-  readonly showInitializer = computed(() => !this.webllm.isReady());
+  // Track current route to allow specific pages without model initialization
+  private readonly currentUrl = signal('');
+
+  readonly showInitializer = computed(() => {
+    // Allow Gemini Chat to be accessed without WebLLM initialization
+    if (this.currentUrl().includes('gemini-chat')) {
+      return false;
+    }
+    return !this.webllm.isReady();
+  });
+
+  constructor() {
+    // Update currentUrl signal on navigation
+    this.router.events.subscribe(() => {
+      this.currentUrl.set(this.router.url);
+    });
+  }
 
   ngOnInit() {
     // Auto-initialize with default model
