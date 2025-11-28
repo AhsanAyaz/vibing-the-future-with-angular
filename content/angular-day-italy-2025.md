@@ -18,7 +18,7 @@ Software Architect @ Scania
 
 <!-- .element style="font-size: 24px;" -->
 
-<img src="assets/images/session-QR-tj8oW.png" style="position: fixed; bottom: 0; right: 0; width: 210px;" alt="Session QR"/>
+<img src="assets/images/workshop-feedback.png" style="position: fixed; bottom: 0; right: 0; width: 210px;" alt="Session QR"/>
 
 ---
 
@@ -122,18 +122,18 @@ We're in denial, pretending everything is fine while our users suffer.
 <!-- .element: class="fragment" -->
 
 Notes:
-Addy Osmani mentions that there's a cost beyond just downloading the code; parsing and compiling can take 2 to 5 times longer. So, that 2.4MB bundle? Your users are actually feeling it like a 10MB download. This is especially true on mobile devices, and even more so here in Italy, where network conditions can vary. (Pause, gesture to GIF) We all know this feeling, right? That endless waiting... it's a universal pain. This isn't just about abstract numbers; it's about real user experience.
+Addy Osmani mentions that there's a cost beyond just downloading the code; parsing and compiling can take 2 to 5 times longer. So, that 2.4MB bundle? Your users are actually feeling it like a 10MB download. This is especially true on mobile devices, and even more so here in Marrakech, where network conditions can vary. (Pause, gesture to GIF) We all know this feeling, right? That endless waiting... it's a universal pain. This isn't just about abstract numbers; it's about real user experience.
 
 --
 
-**Especially on mobile. Even in Italy. 🇮🇹**
+**Especially on mobile. Even in Marrakech. ��**
 
 ![Waiting](https://media.giphy.com/media/tXL4FHPSnVJ0A/giphy.gif)
 
 <!-- .element: class="fragment" -->
 
 Notes:
-Addy Osmani's Law of JavaScript tells us there's a cost beyond just downloading the code; parsing and compiling can take 2 to 5 times longer. So, that 2.4MB bundle? Your users are actually feeling it like a 10MB download. This is especially true on mobile devices, and even more so here in Italy, where network conditions can vary. (Pause, gesture to GIF) We all know this feeling, right? That endless waiting... it's a universal pain. This isn't just about abstract numbers; it's about real user experience.
+Addy Osmani's Law of JavaScript tells us there's a cost beyond just downloading the code; parsing and compiling can take 2 to 5 times longer. So, that 2.4MB bundle? Your users are actually feeling it like a 10MB download. This is especially true on mobile devices, and even more so here in Marrakech, where network conditions can vary. (Pause, gesture to GIF) We all know this feeling, right? That endless waiting... it's a universal pain. This isn't just about abstract numbers; it's about real user experience.
 
 ---
 
@@ -394,6 +394,8 @@ Now, for the "Secrets & Puzzles" of economics: Cloud vs. On-Device AI. Let's do 
 
 ### Modern Angular + Signals = 🚀
 
+--
+
 **Before (the old way):**
 
 ```typescript
@@ -420,11 +422,12 @@ export class OldComponent implements OnInit, OnDestroy {
 }
 ```
 
-<!-- .element: class="fragment" -->
+Notes:
+Now, let's look at the "before." This is how we used to write Angular components. (Point to code snippet) All that boilerplate, the ceremony of `OnInit`, `OnDestroy`, the endless `Subject` for `takeUntil`. We had `loading` flags, data arrays, and the constant worry about memory leaks. (Gesture to Yawn GIF) It was tedious, wasn't it? This is the "before" picture in our transformation story.
 
 --
 
-![Yawn](https://media.giphy.com/media/3o7aCRG4DR8t8qwdqM/giphy.gif)
+![Yawn](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExdDZ6M2syNHkwam8yejJ6dGo1ZnVjZWJxd3Y0Z3ZvdXloM3F2cWxxMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QkR0NS30aawH6/giphy.gif) <!-- .element: style="height: 400px;" -->
 
 Notes:
 Now, let's look at the "before." This is how we used to write Angular components. (Point to code snippet) All that boilerplate, the ceremony of `OnInit`, `OnDestroy`, the endless `Subject` for `takeUntil`. We had `loading` flags, data arrays, and the constant worry about memory leaks. (Gesture to Yawn GIF) It was tedious, wasn't it? This is the "before" picture in our transformation story.
@@ -463,8 +466,6 @@ export class ModernComponent {
 ![Chef's kiss](https://media.giphy.com/media/l3q2SaisWTeZnV9wk/giphy.gif)
 
 **90% less code. Zero memory leaks. Pure beauty.**
-
-<!-- .element: class="fragment" -->
 
 Notes:
 And now, the "after." (Point to code snippet) This is the modern way: Signals, standalone components, native control flow. Look at this! It's 90% less code, zero memory leaks, and pure beauty. (Gesture to chef's kiss GIF) This is the transformation complete. We've gone from the "child" phase of struggle to the "adult" phase of elegant, efficient code. It's a huge relief and incredibly satisfying.
@@ -700,7 +701,19 @@ This diagram illustrates the professional workflow. It's not a shortcut, there's
 
 --
 
-#### 3. Model Context Protocol (MCP)
+#### 3. Antigravity (Google's Agentic IDE)
+
+**The new kid on the block.**
+
+- **Research Preview:** [antigravity.google](https://antigravity.google)
+- **Agentic:** It doesn't just code; it _does_.
+- **FREE Access:** Gemini 3 Pro & Claude 4.5 Sonnet (during preview) 🤯
+
+<!-- .element: class="fragment" -->
+
+--
+
+#### 4. Model Context Protocol (MCP)
 
 **The secret sauce:** Context is everything.
 
@@ -720,7 +733,45 @@ MCP provides AI with:
 <!-- .element: class="fragment" -->
 
 Notes:
-Let's talk about the essential tools of the trade. First, Cline: it's free, open source, and offers context-aware code generation. It understands your codebase, supports Model Context Protocol, and works with Gemini, Claude, and GPT. Second, Gemini 2.5 Flash, which offers an incredible 1 million+ token context, multimodal capabilities, and fast streaming responses. While its token pricing (Input: $0.30 / 1M tokens, Output: $2.50 / 1M tokens) is higher than some alternatives, its advanced features make it a powerful tool. But the secret sauce that brings it all together is the Model Context Protocol, or MCP. (Point to "That's Funny" GIF) This is the puzzle piece that makes everything work better, providing AI with file structure, dependencies, API contracts, coding standards, and test coverage insights. Better context truly equals better output.
+Let's talk about the essential tools of the trade. First, Cline: it's free, open source, and offers context-aware code generation. Second, Gemini 2.5 Flash/Pro, which offers massive context windows. Third, Google's new Agentic IDE, Antigravity. It's currently in research preview and offers free access to powerful models like Gemini 3 Pro and Claude 4.5 Sonnet. I've been hooked on it! But the secret sauce is the Model Context Protocol (MCP).
+
+---
+
+### The New Skill: Context Engineering
+
+**Prompt Engineering is dead. Long live Context Engineering.**
+
+<!-- .element: class="fragment" -->
+
+--
+
+**What is Context Engineering?**
+
+It's the art of curating the _perfect_ information for the AI.
+
+- **Not just:** "Write a component."
+- **But:** "Here is my design system, my API types, my project structure. Now, write a component that fits _perfectly_."
+
+<!-- .element: class="fragment" -->
+
+--
+
+#### MCP: The Context Pipeline
+
+**MCP connects your AI to your reality.**
+
+![Pipeline](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbGJxMnFlNjd1am03OXU1anF3ZDVlbGVpbmg3ODJiZGk0cnhxaGd6ZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/tyxovVLbfZdok/giphy.gif)
+
+- **Filesystem:** "Read these 5 files."
+- **Database:** "Check the schema."
+- **Tools:** "Run this test."
+
+**Better Context = Better Code.**
+
+<!-- .element: class="fragment" -->
+
+Notes:
+This brings us to a crucial new skill: Context Engineering. Forget "Prompt Engineering" – that's old news. Context Engineering is the art of curating the _perfect_ information for the AI. It's not just asking for code; it's providing the design system, the API types, the project structure. And MCP is the pipeline that makes this possible, connecting your AI to your filesystem, database, and tools. Better context always leads to better code.
 
 ---
 
@@ -881,44 +932,8 @@ Here's some practical, actionable advice: Angular + AI Best Practices. You must 
 
 ---
 
-### The Modern Angular Stack (2025)
-
-```typescript
-// The gold standard: Everything you saw today
-@Component({
-  selector: 'app-intelligent',
-  standalone: true, // ✅ No NgModules
-  changeDetection: ChangeDetectionStrategy.OnPush, // ✅ Performance
-  template: `
-    @if (aiService.isReady()) { <!-- ✅ Native control flow -->
-      @for (item of predictions(); track item.id) {
-        <app-item [data]="item" />
-      }
-    }
-  `,
-})
-export class IntelligentComponent {
-  readonly aiService = inject(AIService); // ✅ inject() over constructor
-  readonly userBehavior = signal<Action[]>([]); // ✅ Signals
-
-  readonly predictions = computed(() =>
-    // ✅ Computed state
-    this.aiService.predictNext(this.userBehavior())
-  );
-
-  readonly config = input.required<Config>(); // ✅ Signal inputs
-  readonly selected = output<Item>(); // ✅ Signal outputs
-}
-```
-
-<!-- .element: class="fragment" -->
-
-**This is what AI should generate. With your guidance.**
-
-<!-- .element: class="fragment" -->
-
 Notes:
-This is the gold standard, the Modern Angular Stack for 2025 – everything you've seen today. (Point to code snippet) Standalone components, `ChangeDetectionStrategy.OnPush` for performance, native control flow with `@if` and `@for`, `inject()` over constructor injection, signals for state, computed signals for derived state, signal inputs, and signal outputs. This is the template for success, integrating modern Angular patterns with AI. This is the destination of our journey, what "good" code looks like today. And this is what AI _should_ generate, with your expert guidance.
+This is the gold standard, the Modern Angular Stack for 2025. We've seen the code: Signals, standalone components, native control flow. It's the template for success. And importantly, this is what AI _should_ generate when you provide it with the right context. You are the architect ensuring this quality.
 
 ---
 
@@ -1151,7 +1166,7 @@ Now, for a bonus... (Gesture to Mind blown GIF) A plot twist! This _entire_ pres
 
 <!-- .slide: style="font-size: 1.8rem" -->
 
-![QR](assets/images/session-QR-tj8oW.png)
+![QR](assets/images/workshop-feedback.png)
 
 <!-- .element: class="fragment" style="width: 400px; margin: 0 auto;" -->
 
@@ -1186,15 +1201,15 @@ Here are some practical resources to help you on your journey. (Point to list) Y
 
 <!-- .slide: data-background="#34a853"  style="font-size: 1.8rem" -->
 
-## Thank You, Angular Italy! 🇮🇹
+## Thank You, Angular Marrakech! ��
 
-### Grazie mille!
+### Shukran!
 
-![Italy celebration](https://media.giphy.com/media/g9582DNuQppxC/giphy.gif)
+![Marrakech celebration](https://media.giphy.com/media/g9582DNuQppxC/giphy.gif)
 
 **Go build something intelligent.**
 
 **And remember: You're the architect. AI is your apprentice.**
 
 Notes:
-(Gesture to Italy celebration GIF) Thank you, Angular Italy! Grazie mille! Go build something intelligent. And remember: You're the architect. AI is your apprentice. This is our moment of triumph, a celebration of community, and a readiness for the future. You are in control, you are elevated, and you have the tools to achieve your "Happy Ever After."
+(Gesture to Marrakech celebration GIF) Thank you, Angular Marrakech! Shukran! Go build something intelligent. And remember: You're the architect. AI is your apprentice. This is our moment of triumph, a celebration of community, and a readiness for the future. You are in control, you are elevated, and you have the tools to achieve your "Happy Ever After."
