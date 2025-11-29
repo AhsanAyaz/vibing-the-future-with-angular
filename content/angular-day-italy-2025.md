@@ -22,6 +22,54 @@ Software Architect @ Scania
 
 ---
 
+## Who here likes AI?
+
+--
+
+### Who here uses AI for just coding?
+
+--
+
+### Do you know what I try to use AI for?
+
+--
+
+![Drawing](assets/images/nano-banana/drawing.png) <!-- .element: style="width: 50%;" -->
+
+prompt:
+Generate a super realistic image of a programmer using this drawing. Keep the weird pose as much as realistically possible.
+Use myself as the programmer in the image.
+
+<!-- .element: class="fragment" -->
+
+--
+
+![Generated Image 1](assets/images/nano-banana/generated-image-1.jpeg)
+
+--
+
+![Drawing](assets/images/nano-banana/drawing.png) <!-- .element: style="width: 30%;" -->
+
+#### +
+
+[Prompt]
+
+#### +
+
+## ![Ahsan PFP](assets/images/nano-banana/ahsan-pfp.jpeg) <!-- .element: style="width: 30%;" -->
+
+--
+
+![Generated Image 2](assets/images/nano-banana/generated-image-2.jpeg)
+
+--
+
+![Generated Image 3](assets/images/nano-banana/generated-image-3.jpeg)
+
+<!-- .element style="height: 500px" -->
+
+---
+
 <!-- THE OPENING: Hook them with humor and relatability -->
 
 ![Me on Monday morning](https://media.giphy.com/media/13GIgrGdslD9oQ/giphy.gif)
@@ -39,10 +87,6 @@ Notes:
 
 **43 tickets. 2 weeks. 1 developer.**
 
-![Internal screaming](https://media.giphy.com/media/3o7qDSOvfaCO9b3MlO/giphy.gif)
-
-<!-- .element: class="fragment" -->
-
 ---
 
 ### But wait... there's hope!
@@ -59,7 +103,7 @@ But don't worry, we're not staying in that state of despair for long! There's ho
 
 **Today's revelation:** What if AI could help us write those love letters faster, better, and with less tears?
 
-![Mind blown](https://media.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.gif)
+![Tears](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmxwZmRxMTc1ZTFrYmM0aHg2Nm1jdXVrM3ZrenRzOTVpeHU4amo5OCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/d2lcHJTG5Tscg/giphy.gif)
 
 <!-- .element: class="fragment" -->
 
@@ -70,8 +114,6 @@ But don't worry, we're not staying in that state of despair for long! There's ho
 The Developer's Dilemma
 
 ### (Or: Why We Can't Have Nice Things)
-
-![Stressed developer](https://media.giphy.com/media/l46Cy1rHbQ92uuLXa/giphy.gif)
 
 Notes:
 Now, let's talk about the developer's dilemma. This is where we descend into the problem, the "man in a hole" story arc.
@@ -90,23 +132,19 @@ Now, let's talk about the developer's dilemma. This is where we descend into the
 
 - Average JS payload: **2.4MB** (up 35% from 2023)
 - Only **31.2%** of sites pass Core Web Vitals
+
+--
+
 - Angular apps: **68% fail** Core Web Vitals
 
-<!-- .element: class="fragment" -->
-
 **Source:** [HTTP Archive, Web Almanac 2024](https://almanac.httparchive.org/en/2024/)
+
+![This is fine meme](https://media.giphy.com/media/QMHoU66sBXqqLqYvGO/giphy.gif)
 
 <!-- .element: class="fragment" -->
 
 Notes:
 We all want nice things, performant web apps, but let's be real: we're drowning in JavaScript. (Pause for effect) The numbers don't lie. HTTP Archive's Web Almanac 2024 shows that the average JavaScript payload is 2.4MB, up 35% from 2023. Only 31.2% of sites pass Core Web Vitals, and for Angular apps, a staggering 68% fail. It's tough out there, and sometimes, it feels like this, right? (Point to "This is fine" meme)
-
---
-
-![This is fine meme](https://media.giphy.com/media/QMHoU66sBXqqLqYvGO/giphy.gif)
-
-Notes:
-We're in denial, pretending everything is fine while our users suffer.
 
 ---
 
@@ -126,7 +164,7 @@ Addy Osmani mentions that there's a cost beyond just downloading the code; parsi
 
 --
 
-**Especially on mobile. Even in Marrakech. ��**
+**Especially on mobile. Even in Marrakech. 🌴**
 
 ![Waiting](https://media.giphy.com/media/tXL4FHPSnVJ0A/giphy.gif)
 
@@ -169,6 +207,12 @@ Notes:
 And what does this look like in our Angular codebases? Well, take a look at this. (Point to code snippet) This is typical Monday morning code, right? We have components implementing `OnInit`, `OnDestroy`, `AfterViewInit`, and a whole host of subscriptions. Hundreds of lines of setup code, RxJS chains that go on forever...
 
 --
+
+```typescript
+ .subscribe(() => {
+    // Did I remember to unsubscribe? 🤔
+  });
+```
 
 ![Confused math lady](https://media.giphy.com/media/WRQBXSCnEFJIuxktnw/giphy.gif)
 
@@ -257,6 +301,8 @@ Build apps that understand users without sending data to the cloud.
 
 **AI-assisted development with Cline + Gemini**
 
+**OR Antigravity**
+
 ![Teamwork](https://media.giphy.com/media/l1J9u3TZfpmeDLkD6/giphy.gif)
 
 <!-- .element style="height: 400px;" -->
@@ -327,10 +373,6 @@ Patient data → Browser AI → Response
 <!-- .element: class="fragment" -->
 
 **GDPR compliance:** ✅ No problemo
-
-<!-- .element: class="fragment" -->
-
-![Perfect](https://media.giphy.com/media/3oEjHCWdU7F4hkcudy/giphy.gif)
 
 <!-- .element: class="fragment" -->
 
@@ -425,13 +467,6 @@ export class OldComponent implements OnInit, OnDestroy {
 Notes:
 Now, let's look at the "before." This is how we used to write Angular components. (Point to code snippet) All that boilerplate, the ceremony of `OnInit`, `OnDestroy`, the endless `Subject` for `takeUntil`. We had `loading` flags, data arrays, and the constant worry about memory leaks. (Gesture to Yawn GIF) It was tedious, wasn't it? This is the "before" picture in our transformation story.
 
---
-
-![Yawn](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExdDZ6M2syNHkwam8yejJ6dGo1ZnVjZWJxd3Y0Z3ZvdXloM3F2cWxxMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QkR0NS30aawH6/giphy.gif) <!-- .element: style="height: 400px;" -->
-
-Notes:
-Now, let's look at the "before." This is how we used to write Angular components. (Point to code snippet) All that boilerplate, the ceremony of `OnInit`, `OnDestroy`, the endless `Subject` for `takeUntil`. We had `loading` flags, data arrays, and the constant worry about memory leaks. (Gesture to Yawn GIF) It was tedious, wasn't it? This is the "before" picture in our transformation story.
-
 ---
 
 ### Modern Angular + Signals = 🚀
@@ -477,8 +512,6 @@ And now, the "after." (Point to code snippet) This is the modern way: Signals, s
 --
 
 **Watch AI respond in real-time**
-
-![Typing fast](https://media.giphy.com/media/13HgwGsXF0aiGY/giphy.gif)
 
 **The magic:** Angular's new `resource` API + Streaming
 
@@ -556,10 +589,8 @@ Let's talk performance proof, with real benchmarks comparing Web-LLM against Clo
 
 ### (Or: How I Learned to Stop Worrying and Love AI Coding)
 
-![Transformation](https://media.giphy.com/media/zaezT79s3Ng7C/giphy.gif)
-
 Notes:
-This brings us to Act III: The Developer Transformation. We've just seen how AI can solve user problems – slow, privacy-invasive apps. Now, it's time to tackle our own challenges as developers: too much work, too little time. (Gesture to transformation GIF) This is a major shift, a "Circle of Life" moment where we evolve from practitioners to experts who teach others.
+This brings us to Act III: The Developer Transformation. We've just seen how AI can solve user problems – slow, privacy-invasive apps. Now, it's time to tackle our own challenges as developers: too much work, too little time. This is a major shift, a "Circle of Life" moment where we evolve from practitioners to experts who teach others.
 
 ---
 
@@ -568,10 +599,6 @@ This brings us to Act III: The Developer Transformation. We've just seen how AI 
 **What Twitter promised me:**
 
 > "Just prompt AI and ship features in minutes! 🚀"
-
-<!-- .element: class="fragment" -->
-
-![Excited](https://media.giphy.com/media/5VKbvrjxpVJCM/giphy.gif)
 
 <!-- .element: class="fragment" -->
 
@@ -591,9 +618,7 @@ eval(userInput); // 💀 Security nightmare
 
 <!-- .element: class="fragment" -->
 
-![Disaster](https://media.giphy.com/media/55itGuoAJiZEEen9gg/giphy.gif)
-
-<!-- .element: class="fragment" -->
+![This is fine meme](https://media.giphy.com/media/QMHoU66sBXqqLqYvGO/giphy.gif)
 
 Notes:
 But let's be honest, there's a "Vibe Coding" trap out there. What Twitter promised me was: "Just prompt AI and ship features in minutes! 🚀" (Gesture to excited GIF) We all got excited, didn't we? But what actually happened was often more like this: (Point to bad code snippet, then to disaster GIF) AI-generated "vibe code" full of `eval(userInput)`, no error handling, no tests, magic numbers everywhere... it was a security nightmare and pure technical debt. This is the "Three Great Conflicts" in action – expectation versus reality. We fell for the hype, and there were consequences. Vibe coding is the rebel that breaks the rules, but rebels often lead to disaster.
@@ -602,15 +627,19 @@ But let's be honest, there's a "Vibe Coding" trap out there. What Twitter promis
 
 ### The 70/30 Rule of AI Coding
 
-![Iceberg](https://media.giphy.com/media/3o7TKP9ln2Dr6ze6f6/giphy.gif)
+--
 
-**The visible 70%:** Working features, impressive demos, fast prototypes
+![Iceberg](assets/images/iceberg.jpg)
 
-<!-- .element: class="fragment" -->
+<!-- .element style="height: 550px" -->
 
-**The hidden 30%:** Security, performance, accessibility, edge cases, maintainability, testing
+**The visible 30%:** Working features, impressive demos, fast prototypes
 
-<!-- .element: class="fragment" -->
+<!-- .element: class="fragment" style="font-size: 1.5rem" -->
+
+**The hidden 70%:** Security, performance, accessibility, edge cases, maintainability, testing
+
+<!-- .element: class="fragment" style="font-size: 1.5rem" -->
 
 --
 
@@ -648,14 +677,6 @@ This leads us to the 70/30 Rule of AI Coding. (Gesture to iceberg GIF) The visib
 
 <!-- .element: class="fragment" -->
 
-![Conductor](https://media.giphy.com/media/l0HlDDyxBfSaPpU88/giphy.gif)
-
-<!-- .element: class="fragment" -->
-
-**Think:** Orchestra conductor, not solo violinist.
-
-<!-- .element: class="fragment" -->
-
 Notes:
 So, what's the right way to approach AI-assisted engineering? It's a mindset shift. Before, we thought, "I write all the code." Now, it's "I architect systems and curate AI outputs." (Gesture to conductor GIF) Think of yourselves as an orchestra conductor, not a solo violinist. You're not playing every instrument, but you're creating harmony, guiding the entire performance. This is the transition to a "parent" archetype – wise, supportive, architectural. It's the mature, professional approach to development.
 
@@ -665,7 +686,7 @@ So, what's the right way to approach AI-assisted engineering? It's a mindset shi
 
 ![The professional workflow](assets/images/the-professional-workflow.png)
 
-<!-- .element: class="fragment" style="width: 650px; margin: 0 auto;" -->
+<!-- .element: class="fragment" style="height: 500px; margin: 0 auto;" -->
 
 **Key insight:** You spend 0% time typing boilerplate, 100% time on architecture, quality, and UX.
 
@@ -707,7 +728,9 @@ This diagram illustrates the professional workflow. It's not a shortcut, there's
 
 #### 3. Antigravity (Google's Agentic IDE)
 
-**The new kid on the block.**
+<video src="assets/images/antigravity.mp4" autoplay loop muted></video>
+
+<!-- .element style="height: 300px" -->
 
 - **Research Preview:** [antigravity.google](https://antigravity.google)
 - **Agentic:** It doesn't just code; it _does_.
@@ -779,16 +802,14 @@ This brings us to a crucial new skill: Context Engineering. Forget "Prompt Engin
 
 ---
 
-### Live Demo 3: Building a Feature with Cline
+### Live Demo 3: Building a Feature with Antigravity and Gemini 3.0
 
 --
 
 **Challenge:** Add a newsletter generator component
 
-![Ready to work](https://media.giphy.com/media/LmNwrBhejkK9EFP504/giphy.gif)
-
 **Old way:** 1-2 hours
-**AI-assisted way:** 10 minutes
+**AI-assisted way:** <5 minutes
 
 <!-- .element: class="fragment" -->
 
@@ -816,7 +837,7 @@ Create a new component in the Angular app inside vibing-with-angular folder, tha
 
 <!-- .element: class="fragment" style="font-size: 1.4rem;" -->
 
-![Success](https://media.giphy.com/media/a0h7sAqON67nO/giphy.gif)
+![Success](assets/images/success-kid.gif)
 
 <!-- .element: class="fragment" -->
 
@@ -850,10 +871,6 @@ Let's look at the real results from building this presentation's demo app. (Poin
 - Architecture: 25% (3h) 🧠
 - Review & Refinement: 35% (4.2h) 🔍
 - Testing & Polish: 35% (4.2h) ✨
-
-<!-- .element: class="fragment" -->
-
-![Level up](https://media.giphy.com/media/7FgDPLLKh1v4d2XLkl/giphy.gif)
 
 <!-- .element: class="fragment" -->
 
@@ -936,11 +953,6 @@ Here's some practical, actionable advice: Angular + AI Best Practices. You must 
 
 ---
 
-Notes:
-This is the gold standard, the Modern Angular Stack for 2025. We've seen the code: Signals, standalone components, native control flow. It's the template for success. And importantly, this is what AI _should_ generate when you provide it with the right context. You are the architect ensuring this quality.
-
----
-
 ### The Economic Reality
 
 📊 **Team Productivity Analysis (6 months, Google Chrome Team)**
@@ -970,7 +982,7 @@ Let's talk about the economic reality, with real data from Addy Osmani's team at
 
 ### The Hard Truths
 
-![Reality check](https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif)
+![Reality check](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExNjd0dm10emRxbmVnaXFwcHR3eHY3cDBicWFsNzZlcGk4Ym95dm9lcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/xUPGctMbjWqm0WIYyk/giphy.gif)
 
 --
 
@@ -1017,8 +1029,6 @@ Now for the hard truths. (Gesture to reality check GIF) Let's be brutally honest
 
 ### (Or: Where Do We Go From Here?)
 
-![Looking forward](https://media.giphy.com/media/BpGWitbFZflfSUYuZ9/giphy.gif)
-
 Notes:
 And that brings us to Act V: The Future. (Gesture to looking forward GIF) Where do we go from here? We've been through the entire journey, learned the lessons, and now it's time to look ahead with optimism and readiness.
 
@@ -1055,8 +1065,6 @@ New: Intent → Generate → Curate → Validate → Deploy
 
 <!-- .element: class="fragment" -->
 
-<img class="fragment" src="https://media.giphy.com/media/3o7qDQ4kcSD1PLM3BK/giphy.gif" style="position:fixed; top:0; bottom:0; left:0; right:0; margin:0 auto; width: 100%; height: 100%; object-fit: contain;">
-
 Notes:
 The paradigm shift is profound: from coding to curating. Our old workflow was linear: Idea → Design → Code → Test → Deploy. The new workflow is about Intent → Generate → Curate → Validate → Deploy. (Gesture to evolution GIF) What changes? Intent matters more – clear specs lead to better outputs. Curation becomes a vital skill – knowing what to keep, fix, or reject. Validation is critical – rigorous testing, security, and performance. And finally, systems thinking – understanding the entire flow, not just syntax. This is our "Rite of Passage" complete; we've evolved from mere coders to architects. It's an empowering, not threatening, vision, and it fills me with excitement for the future.
 
@@ -1088,10 +1096,6 @@ The paradigm shift is profound: from coding to curating. Our old workflow was li
 
 <!-- .element: class="fragment" -->
 
-<img src="https://media.giphy.com/media/l0HlKrB02QY0f1mbm/giphy.gif" style="position:fixed; top:0; bottom:0; left:0; right:0; margin:0 auto; width: 100%; height: 100%; object-fit: contain;">
-
-<!-- .element: class="fragment"  -->
-
 **And we build it 5x faster than before.**
 
 <!-- .element: class="fragment" -->
@@ -1119,10 +1123,6 @@ This is the future we're building: On-device AI + Modern Angular. (Point to list
 
 3️⃣ **Modernize your Angular** - Signals, standalone, native control flow
 → Start: [angular.dev/guide/signals](https://angular.dev)
-
-<!-- .element: class="fragment" -->
-
-![Let's go](https://media.giphy.com/media/l0IylOPCNkiqOgMyA/giphy.gif)
 
 <!-- .element: class="fragment" -->
 
@@ -1179,7 +1179,7 @@ Here are some practical resources to help you on your journey. (Point to list) Y
 
 ---
 
-<!-- .slide: data-background="#1a73e8" -->
+<!-- .slide: data-background="#000" -->
 
 ![Thank you](https://media.giphy.com/media/3oEjI1erPMTMBFmNHi/giphy.gif)
 
@@ -1199,13 +1199,13 @@ Here are some practical resources to help you on your journey. (Point to list) Y
 - GitHub: [github.com/ahsanayaz](https://github.com/ahsanayaz)
 - Blog: [blog.codewithahsan.dev](https://blog.codewithahsan.dev)
 
-![Wave](https://media.giphy.com/media/26FLdmIp6wJr91JAI/giphy.gif)
+![Ahsan PFP](assets/images/nano-banana/ahsan-pfp.jpeg)
 
 ---
 
 <!-- .slide: data-background="#34a853"  style="font-size: 1.8rem" -->
 
-## Thank You, Angular Marrakech! ��
+## Thank You, Angular Marrakech! 🌴
 
 ### Shukran!
 
