@@ -14,14 +14,16 @@
   <body>
     <div class="reveal">
       <div class="slides">
-        
+        <section
+          data-markdown="profiles/ahsan.md"
+          data-separator="^\n---\n$"
+          data-separator-vertical="^\n--\n$"
+        ></section>
       </div>
+      <div class="slides"></div>
     </div>
     <template id="slidesTemplate">
-      <section
-        data-separator="^---$"
-        data-separator-vertical="^--$"
-      ></section>
+      <section data-separator="^---$" data-separator-vertical="^--$"></section>
     </template>
     <script type="text/javascript">
       const params = new URLSearchParams(location.search);
@@ -31,7 +33,7 @@
       const templateClone = template.cloneNode(true);
       const content = templateClone.content;
       const section = content.firstElementChild;
-      console.log({content})
+      console.log({ content });
       section.setAttribute('data-markdown', `content/${targetMarkdown}`);
       const slidesContainer = document.querySelector('.slides');
       slidesContainer.appendChild(section);
