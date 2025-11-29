@@ -480,15 +480,19 @@ And now, the "after." (Point to code snippet) This is the modern way: Signals, s
 
 ![Typing fast](https://media.giphy.com/media/13HgwGsXF0aiGY/giphy.gif)
 
-**The magic:** Streaming tokens via Angular signals
+**The magic:** Angular's new `resource` API + Streaming
 
 ```typescript
-async *chat(message: string): AsyncGenerator<string> {
-  for await (const chunk of completion) {
-    yield chunk.choices[0]?.delta?.content || '';
-    // Signal updates automatically! 🎯
+readonly chatResource = resource({
+  params: () => ({ prompt: this.prompt() }),
+  stream: async ({ params, abortSignal }) => {
+    const stream = await model.generateContentStream(params.prompt);
+    for await (const chunk of stream) {
+      // Updates signal automatically! 🎯
+      yield chunk.text();
+    }
   }
-}
+});
 ```
 
 <!-- .element: class="fragment" -->
