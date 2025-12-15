@@ -38,7 +38,6 @@ Software Architect @ Scania
 
 prompt:
 Generate a super realistic image of a programmer using this drawing. Keep the weird pose as much as realistically possible.
-Use myself as the programmer in the image.
 
 <!-- .element: class="fragment" -->
 
